@@ -256,5 +256,39 @@
     "network": "Nema veze sa serverom. Podaci nisu izgubljeni.",
     "rateLimited": "Previše pokušaja. Pokušajte ponovo za 10 minuta.",
     "spam": "Forma je poslata prebrzo. Pokušajte ponovo."
+  },
+  "emails": {
+    "hello": "Zdravo, {name}!",
+    "helloAnon": "Zdravo!",
+    "signature": "Tim {brand}",
+    "footer": "Ova poruka je poslata automatski. Odgovorite na nju ako imate pitanja.",
+    "verifySubject": "Potvrdite email za {brand}",
+    "verifyText": "Da biste se prijavili na nalog, potvrdite adresu e-pošte.",
+    "verifyButton": "Potvrdi email",
+    "resetSubject": "Nova lozinka za {brand}",
+    "resetText": "Primili smo zahtev za promenu lozinke. Link važi 1 sat. Ako to niste bili vi, samo zanemarite ovu poruku.",
+    "resetButton": "Postavi novu lozinku",
+    "emailChangeSubject": "Potvrdite novi email za {brand}",
+    "emailChangeText": "Potvrdite da je ova adresa vaša — od sada se prijavljujete sa njom.",
+    "emailChangeButton": "Potvrdi novi email",
+    "orderSubject": "Porudžbina {number} je primljena",
+    "orderIntro": "Hvala na porudžbini! Menadžer će vas pozvati u radno vreme da potvrdi sastav, rok i način plaćanja.",
+    "orderItems": "Sastav porudžbine",
+    "orderTotal": "Ukupno",
+    "orderDelivery": "Dostava",
+    "orderNext": "Šta sledi: poziv menadžera → potvrda i plaćanje → izrada → dostava.",
+    "orderButton": "Otvori porudžbinu",
+    "statusSubject": "Porudžbina {number}: {status}",
+    "statusText": "Status vaše porudžbine je promenjen: {status}.",
+    "inquirySubject": "Zahtev {number} je primljen",
+    "inquiryText": "Hvala! Primili smo vaš zahtev i odgovorićemo {responseTime}.",
+    "status": {
+      "new": "nova",
+      "confirmed": "potvrđena",
+      "production": "u izradi",
+      "ready": "spremna za slanje",
+      "delivered": "dostavljena",
+      "cancelled": "otkazana"
+    }
   }
 }

@@ -24,7 +24,8 @@
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "db:dev": "tsx scripts/db-dev.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "db:reset": "tsx scripts/db-reset.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

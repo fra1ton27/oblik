@@ -20,6 +20,8 @@ const pg = new EmbeddedPostgres({
   password: decodeURIComponent(url.password || 'oblik'),
   port: Number(url.port || 5432),
   persistent: true,
+  // UTF-8 обязательно: иначе на Windows кластер создаётся в WIN1251 и сербские č, ć, đ, š, ž не сохраняются
+  initdbFlags: ['--encoding=UTF8', '--locale=C', '--lc-collate=C', '--lc-ctype=C'],
   onLog: () => {},
   onError: (message) => console.error('[postgres]', message),
 })

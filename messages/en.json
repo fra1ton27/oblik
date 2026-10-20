@@ -256,5 +256,39 @@
     "network": "Can’t reach the server. Your details are safe.",
     "rateLimited": "Too many attempts. Please try again in 10 minutes.",
     "spam": "The form was sent too quickly. Please try again."
+  },
+  "emails": {
+    "hello": "Hello {name},",
+    "helloAnon": "Hello,",
+    "signature": "The {brand} team",
+    "footer": "This email was sent automatically. Just reply if you have any questions.",
+    "verifySubject": "Confirm your email for {brand}",
+    "verifyText": "Please confirm your email address to sign in to your account.",
+    "verifyButton": "Confirm email",
+    "resetSubject": "Your new {brand} password",
+    "resetText": "We received a request to reset your password. The link is valid for 1 hour. If it wasn’t you, simply ignore this email.",
+    "resetButton": "Set a new password",
+    "emailChangeSubject": "Confirm your new email for {brand}",
+    "emailChangeText": "Please confirm this address is yours — you will sign in with it from now on.",
+    "emailChangeButton": "Confirm new email",
+    "orderSubject": "Order {number} received",
+    "orderIntro": "Thank you for your order! A manager will call you during business hours to confirm the items, lead time and payment.",
+    "orderItems": "Your order",
+    "orderTotal": "Total",
+    "orderDelivery": "Delivery",
+    "orderNext": "What happens next: a call from our manager → confirmation and payment → production → delivery.",
+    "orderButton": "View order",
+    "statusSubject": "Order {number}: {status}",
+    "statusText": "Your order status has changed: {status}.",
+    "inquirySubject": "Request {number} received",
+    "inquiryText": "Thank you! We have received your request and will reply {responseTime}.",
+    "status": {
+      "new": "new",
+      "confirmed": "confirmed",
+      "production": "in production",
+      "ready": "ready to ship",
+      "delivered": "delivered",
+      "cancelled": "cancelled"
+    }
   }
 }
