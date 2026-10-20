@@ -29,8 +29,8 @@ export const site = {
     },
   },
   features: {
-    /** WebGL-сцена витрины поверх CSS 3D-варианта (этап 6) */
-    showcaseWebGL: false,
+    /** WebGL-сцена витрины поверх CSS 3D-варианта; CSS-фолбэк включается автоматически */
+    showcaseWebGL: true,
   },
   orderPrefix: 'OB',
   inquiryPrefix: 'Z',

@@ -17,7 +17,7 @@ type StyleOptions = {
  */
 export function buttonClasses({ variant = 'primary', size = 'md', fullWidth, className }: StyleOptions = {}) {
   const base = cn(
-    'group/btn relative isolate inline-flex shrink-0 select-none items-center justify-center gap-2 overflow-hidden',
+    'group/btn relative isolate inline-flex select-none items-center justify-center gap-2 overflow-hidden',
     'rounded-pill font-semibold whitespace-nowrap',
     'transition-[color,background-color,border-color,opacity,transform] duration-200 ease-soft',
     'before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:rounded-[inherit]',
@@ -46,6 +46,7 @@ export function buttonClasses({ variant = 'primary', size = 'md', fullWidth, cla
   }
   return cn(
     base,
+    /\b(flex-1|shrink|grow)\b/.test(className ?? '') ? '' : 'shrink-0',
     variant === 'icon' ? iconSizes[size] : sizes[size],
     variants[variant],
     fullWidth && 'w-full',

@@ -346,7 +346,13 @@ export function Showcase({ heading, lead, items, quotes, allowPin = true, headin
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
               onPointerCancel={onPointerUp}
-              className={cn('absolute inset-0 cursor-grab outline-none active:cursor-grabbing focus-visible:outline-2 focus-visible:-outline-offset-2', hovering && 'cursor-none', webgl && 'opacity-0')}
+              data-webgl={webgl ? 'true' : undefined}
+              className={cn(
+                'absolute inset-0 cursor-grab outline-none active:cursor-grabbing focus-visible:outline-2 focus-visible:-outline-offset-2',
+                hovering && 'cursor-none',
+                // с WebGL картинки рисует canvas; DOM-сцена остаётся для событий, фокуса и рукописного круга
+                webgl && '[&_[data-disc]]:opacity-0 [&_[data-cutout]]:opacity-0',
+              )}
               style={{ transformStyle: 'preserve-3d' }}
             >
               <span id={`${id}-hint`} className="sr-only">
@@ -387,7 +393,7 @@ export function Showcase({ heading, lead, items, quotes, allowPin = true, headin
                           </div>
                         </div>
                       </div>
-                      <div className="relative -mt-[16%] w-full">
+                      <div data-disc className="relative -mt-[16%] w-full">
                         <span aria-hidden className="absolute inset-x-[18%] top-[18%] h-[22%] rounded-[50%] bg-ink/15 blur-md" />
                         <Disc color={(item.podium as ShapeColor) ?? 'lavender'} />
                       </div>

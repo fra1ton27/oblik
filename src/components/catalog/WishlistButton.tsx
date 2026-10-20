@@ -32,7 +32,7 @@ export function WishlistButton({ productId, title, className, size = 'sm', tone 
       }}
       className={cn(
         // позиционирование задаёт вызывающий (absolute в карточке), иначе relative
-        className?.match(/(absolute|fixed|sticky)/) ? '' : 'relative',
+        /\b(absolute|fixed|sticky)\b/.test(className ?? '') ? '' : 'relative',
         'z-10 inline-flex items-center justify-center rounded-pill transition-colors duration-200',
         size === 'sm' ? 'size-11' : 'size-12',
         tone === 'paper' ? 'bg-paper/90 hover:bg-paper' : 'border border-line bg-paper hover:border-ink',

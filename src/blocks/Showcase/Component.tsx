@@ -18,7 +18,7 @@ export async function ShowcaseBlockView({ block, context }: { block: ShowcaseBlo
     const collection = context.collection ?? (await getCollections(locale)).find((c) => c.id === id)
     items = await productItems(collection?.products ?? [], locale)
   } else {
-    items = await productItems((await getCatalogIndex(locale)).filter((p) => p.featured), locale)
+    items = await productItems((await getCatalogIndex(locale)).filter((p) => p.featured).sort((a, b) => b.popularity - a.popularity), locale)
   }
   if (!items.length) return null
   const reviews = (await getReviews(locale)).slice(0, 2).map((r) => ({ text: r.text, author: `${r.author}, ${r.city}`, rating: r.rating }))

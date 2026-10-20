@@ -139,7 +139,7 @@ export function filtersToQuery(f: Partial<Filters>, extra: Record<string, string
   return q
 }
 
-type Facet = 'category' | 'collection' | 'material' | 'color' | 'availability' | 'designer' | 'price' | 'width'
+export type Facet = 'category' | 'collection' | 'material' | 'color' | 'availability' | 'designer' | 'price' | 'width'
 
 function matches(p: ProductCard, f: Filters, skip?: Facet): boolean {
   if (skip !== 'category' && f.category && p.category?.slug !== f.category) return false
