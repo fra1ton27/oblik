@@ -1,0 +1,13 @@
+/* TEAM */
+Design & development: @fra1ton27
+GitHub: https://github.com/fra1ton27
+Location: Belgrade, Serbia
+
+/* THANKS */
+Motion references: 1minus1.com, a24.raviklaassens.com (principles only)
+
+/* SITE */
+Languages: Русский, English, Srpski (latinica)
+Standards: HTML5, CSS3, WCAG 2.2 AA
+Components: Next.js, React, Payload CMS, PostgreSQL, Tailwind CSS, next-intl, GSAP, Lenis, three.js
+Fonts: Unbounded, Manrope, Cormorant Garamond (Google Fonts)

@@ -1,0 +1,34 @@
+{
+  "common": {
+    "brandTagline": "Dizajnerski nameštaj za dom",
+    "skipToContent": "Pređi na sadržaj",
+    "languageSwitcher": "Jezik sajta",
+    "loading": "Učitavanje…",
+    "close": "Zatvori"
+  },
+  "nav": {
+    "home": "Početna",
+    "catalog": "Katalog",
+    "collections": "Kolekcije",
+    "custom": "Po meri",
+    "about": "O nama",
+    "contact": "Kontakt",
+    "delivery": "Dostava i plaćanje"
+  },
+  "home": {
+    "heroLine1": "Forma",
+    "heroLine2": "udobnost"
+  },
+  "seo": {
+    "titleTemplate": "%s — {brand}",
+    "defaultTitle": "{brand} — dizajnerski nameštaj za dom",
+    "defaultDescription": "Projektujemo, izrađujemo i prodajemo dizajnerski nameštaj: sofe, stolove, stolice, sisteme za odlaganje i krevete. Radimo i po vašim merama."
+  },
+  "footer": {
+    "copyright": "© {year} {brand}. Sva prava zadržana.",
+    "credit": "Dizajn i razvoj — {handle}"
+  },
+  "errors": {
+    "notFoundTitle": "Ova stranica ne postoji, ali naš nameštaj postoji"
+  }
+}

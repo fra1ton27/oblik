@@ -1,0 +1,10 @@
+node_modules
+.next
+.data
+media
+private-files
+pnpm-lock.yaml
+src/payload-types.ts
+src/app/(payload)/admin/importMap.js
+docs/SPEC.md
+src/migrations

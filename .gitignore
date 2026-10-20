@@ -1,0 +1,32 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# next / build
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+
+# local data
+.data/
+media/
+private-files/
+
+# tests
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+pnpm-debug.log*

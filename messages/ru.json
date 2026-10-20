@@ -1,0 +1,34 @@
+{
+  "common": {
+    "brandTagline": "Дизайнерская мебель для дома",
+    "skipToContent": "Перейти к содержанию",
+    "languageSwitcher": "Язык сайта",
+    "loading": "Загрузка…",
+    "close": "Закрыть"
+  },
+  "nav": {
+    "home": "Главная",
+    "catalog": "Каталог",
+    "collections": "Коллекции",
+    "custom": "На заказ",
+    "about": "О нас",
+    "contact": "Контакты",
+    "delivery": "Доставка и оплата"
+  },
+  "home": {
+    "heroLine1": "Форма",
+    "heroLine2": "уюта"
+  },
+  "seo": {
+    "titleTemplate": "%s — {brand}",
+    "defaultTitle": "{brand} — дизайнерская мебель для дома",
+    "defaultDescription": "Проектируем, производим и продаём дизайнерскую мебель: диваны, столы, стулья, системы хранения и кровати. Делаем по вашим размерам."
+  },
+  "footer": {
+    "copyright": "© {year} {brand}. Все права защищены.",
+    "credit": "Дизайн и разработка — {handle}"
+  },
+  "errors": {
+    "notFoundTitle": "Такой страницы нет, зато есть мебель"
+  }
+}

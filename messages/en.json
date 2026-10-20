@@ -1,0 +1,34 @@
+{
+  "common": {
+    "brandTagline": "Designer furniture for the home",
+    "skipToContent": "Skip to content",
+    "languageSwitcher": "Site language",
+    "loading": "Loading…",
+    "close": "Close"
+  },
+  "nav": {
+    "home": "Home",
+    "catalog": "Catalogue",
+    "collections": "Collections",
+    "custom": "Made to measure",
+    "about": "About",
+    "contact": "Contact",
+    "delivery": "Delivery & payment"
+  },
+  "home": {
+    "heroLine1": "Form",
+    "heroLine2": "comfort"
+  },
+  "seo": {
+    "titleTemplate": "%s — {brand}",
+    "defaultTitle": "{brand} — designer furniture for the home",
+    "defaultDescription": "We design, make and sell designer furniture: sofas, tables, chairs, storage and beds. Made to your measurements on request."
+  },
+  "footer": {
+    "copyright": "© {year} {brand}. All rights reserved.",
+    "credit": "Design & development by {handle}"
+  },
+  "errors": {
+    "notFoundTitle": "This page doesn’t exist, but our furniture does"
+  }
+}

@@ -1,0 +1,431 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+@custom-variant js (&:where(.js-ready, .js-ready *));
+@custom-variant hover-device (@media (hover: hover) and (pointer: fine));
+@custom-variant reduced (@media (prefers-reduced-motion: reduce));
+
+/* ───────────── База ───────────── */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    background: var(--color-milk);
+    color: var(--color-ink);
+    scroll-padding-top: calc(var(--header-h) + 16px);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: clamp(16px, 15.667px + 0.0926vw, 17px);
+    line-height: 1.6;
+    background: var(--color-milk);
+    color: var(--color-ink);
+    min-height: 100svh;
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'kern' 1;
+  }
+
+  ::selection {
+    background: var(--color-lavender);
+    color: var(--color-ink);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img,
+  video,
+  svg,
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  button {
+    cursor: pointer;
+    color: inherit;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  input,
+  textarea,
+  select {
+    /* ≥ 16 px, чтобы iOS не зумил поле */
+    font-size: max(16px, 1rem);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    hyphens: auto;
+    overflow-wrap: break-word;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Видимый фокус: кольцо 2 px lavender-600 с отступом 2 px */
+  :focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  dialog {
+    color: inherit;
+  }
+
+  dialog::backdrop {
+    background: rgb(43 36 51 / 0.4);
+  }
+}
+
+/* ───────────── Типографика (резиновая шкала 360 → 1440 px) ───────────── */
+@utility t-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: clamp(44px, 2.667px + 13.704vw, 200px);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+
+@utility t-h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(32px, 16px + 5.556vw, 96px);
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+
+@utility t-h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(26px, 16px + 3.333vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+@utility t-h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: clamp(22px, 18.667px + 0.926vw, 32px);
+  line-height: 1.2;
+}
+
+@utility t-lead {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(18px, 16px + 0.556vw, 24px);
+  line-height: 1.4;
+}
+
+@utility t-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(16px, 15.667px + 0.0926vw, 17px);
+  line-height: 1.6;
+}
+
+@utility t-small {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@utility t-caption {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@utility t-serif {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-style: italic;
+  font-size: clamp(24px, 16px + 2.222vw, 48px);
+  line-height: 1.1;
+}
+
+@utility t-price {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ───────────── Раскладка ───────────── */
+@utility container-site {
+  width: 100%;
+  max-width: var(--container-site);
+  margin-inline: auto;
+  padding-inline: var(--page-pad);
+}
+
+@utility site-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--gutter);
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+@utility section-y {
+  padding-block: var(--section-gap);
+}
+
+@utility mt-section {
+  margin-top: var(--section-gap);
+}
+
+@utility rounded-section {
+  border-radius: var(--radius-section-sm);
+
+  @media (min-width: 768px) {
+    border-radius: var(--radius-section);
+  }
+}
+
+@utility tap {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@utility sr-only-focusable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+
+  &:focus,
+  &:focus-visible {
+    position: fixed;
+    width: auto;
+    height: auto;
+    margin: 0;
+    clip-path: none;
+    overflow: visible;
+    white-space: normal;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px currentColor;
+  paint-order: stroke fill;
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+@utility tilt {
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform var(--dur-base) var(--ease-soft);
+}
+
+/* ───────────── Состояния анимаций ───────────── */
+
+/* Контент доступен без JS: стартовые состояния ставятся только при .js-ready */
+.js-ready [data-reveal]:not([data-revealed]) {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.js-ready [data-reveal-mask] > .line-inner {
+  transform: translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .js-ready [data-reveal]:not([data-revealed]) {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+/* Блокировка скролла под меню и модалками */
+html.scroll-locked,
+html.scroll-locked body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* Бегущая строка */
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes skeleton {
+  0% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Рукописный круг: линия рисуется через stroke-dashoffset */
+.hand-circle path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 600ms var(--ease-soft);
+}
+
+.group:hover .hand-circle path,
+.group:focus-visible .hand-circle path,
+.hand-circle[data-active='true'] path {
+  stroke-dashoffset: 0;
+}
+
+/* Рич-текст из CMS */
+.prose-oblik {
+  max-width: 68ch;
+  line-height: 1.7;
+
+  & h2 {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 18px + 1.5vw, 36px);
+    line-height: 1.1;
+    margin: 2.2em 0 0.6em;
+  }
+
+  & h3 {
+    font-weight: 600;
+    font-size: 20px;
+    margin: 1.8em 0 0.5em;
+  }
+
+  & p,
+  & ul,
+  & ol {
+    margin: 0 0 1em;
+  }
+
+  & ul {
+    list-style: disc;
+    padding-left: 1.25em;
+  }
+
+  & ol {
+    list-style: decimal;
+    padding-left: 1.25em;
+  }
+
+  & a {
+    color: var(--color-lavender-600);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  & blockquote {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.4em;
+    border-left: 1px solid var(--color-line);
+    padding-left: 1em;
+    margin: 1.5em 0;
+  }
+}

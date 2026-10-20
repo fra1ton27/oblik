@@ -1,0 +1,89 @@
+/*
+ * Дизайн-токены Oblik (docs/SPEC.md, раздел 4). Хардкод hex в компонентах запрещён:
+ * все цвета, радиусы, тени и тайминги берутся отсюда как утилиты Tailwind или var(--…).
+ * Тёмная тема не требуется, но достаточно переопределить переменные в [data-theme='dark'].
+ */
+@theme {
+  /* 4.1 Палитра */
+  --color-*: initial;
+  --color-milk: #f7f3ee;
+  --color-paper: #fffdfb;
+  --color-sand: #ede4d7;
+  --color-line: #e2dad0;
+  --color-ink: #2b2433;
+  --color-ink-soft: #5a5165;
+  --color-plum: #3b3049;
+  --color-lavender: #d6ccf3;
+  --color-lavender-600: #6a55b5;
+  --color-pistachio: #e1ecc0;
+  --color-pistachio-700: #56702a;
+  --color-blush: #f4ddd3;
+  --color-mist: #d6e5ec;
+  --color-success: #3f7a55;
+  --color-error: #b04a40;
+  --color-warning: #8a6420;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* 4.2 Шрифты: переменные приходят из next/font */
+  --font-display: var(--font-unbounded), 'Unbounded', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-cormorant), 'Cormorant Garamond', ui-serif, Georgia, serif;
+
+  /* 11. Брейкпоинты */
+  --breakpoint-sm: 30rem; /* 480 */
+  --breakpoint-md: 48rem; /* 768 */
+  --breakpoint-lg: 64rem; /* 1024 */
+  --breakpoint-xl: 80rem; /* 1280 */
+  --breakpoint-2xl: 90rem; /* 1440 */
+
+  /* 4.4 Радиусы */
+  --radius-field: 8px;
+  --radius-card: 16px;
+  --radius-section: 32px;
+  --radius-section-sm: 20px;
+  --radius-pill: 999px;
+
+  /* 4.4 Тень только у наклонённых карточек и дроуэров */
+  --shadow-float: 0 24px 48px -24px rgb(43 36 51 / 0.18);
+  --shadow-none: none;
+
+  /* 4.4 Контейнер */
+  --container-site: 1440px;
+
+  /* 5.1 Движение */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-move: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root {
+  --dur-fast: 200ms;
+  --dur-base: 400ms;
+  --dur-slow: 700ms;
+  --dur-hero: 1200ms;
+  --stagger-letters: 0.03;
+  --stagger-cards: 0.06;
+
+  /* Сетка: поля контейнера и гаттер */
+  --gutter: 16px;
+  --page-pad: 16px;
+  --section-gap: 64px;
+  --header-h: 56px;
+  --sticky-bar-h: 0px;
+  --focus-ring: 2px solid var(--color-lavender-600);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --page-pad: 32px;
+    --gutter: 24px;
+    --header-h: 72px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --page-pad: 40px;
+    --section-gap: 128px;
+  }
+}
