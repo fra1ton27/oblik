@@ -439,3 +439,47 @@ html.show-preloader .preloader {
 html.show-preloader {
   overflow: hidden;
 }
+
+/* Активный товар на подиуме медленно поворачивается ±8° */
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotateY(-8deg);
+  }
+
+  50% {
+    transform: rotateY(8deg);
+  }
+}
+
+/* Контактная тень под парящим товаром */
+@keyframes hover-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Наклонённая карточка: наклон с md, выравнивание в 0° при hover и фокусе внутри */
+@utility tilt-card {
+  transition: transform var(--dur-base) var(--ease-soft);
+  transform: rotate(var(--tilt-sm, 0deg));
+
+  @media (min-width: 768px) {
+    transform: rotate(var(--tilt-md, -3deg));
+  }
+
+  &:focus-within {
+    transform: rotate(0deg);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: rotate(0deg);
+    }
+  }
+}

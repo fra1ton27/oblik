@@ -547,7 +547,7 @@ async function seedGlobals(media: { hero: number; interiors: number[]; map: numb
       {
         blockType: 'cta',
         variant: 'plum',
-        heading: { ru: 'Давайте обсудим ваш интерьер', en: 'Let’s talk about your space', sr: 'Razgovarajmo o vašem prostoru' }[l],
+        heading: { ru: 'Давайте обсудим', en: 'Let’s talk', sr: 'Hajde da razgovaramo' }[l],
         text: { ru: 'Напишите нам — подберём модели, ткани и сроки.', en: 'Drop us a line and we’ll suggest models, fabrics and timings.', sr: 'Pišite nam i predložićemo modele, tkanine i rokove.' }[l],
         buttonLabel: { ru: 'Отправить', en: 'Send', sr: 'Pošalji' }[l],
         action: 'contactForm',

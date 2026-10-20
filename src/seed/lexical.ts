@@ -25,14 +25,3 @@ export function richText(blocks: RichBlock[]) {
   })
   return { root: { ...base, type: 'root', children } }
 }
-
-/** Плоский текст из Lexical JSON (для описаний в мета-тегах) */
-export function plainText(value: unknown): string {
-  const walk = (n: unknown): string => {
-    if (!n || typeof n !== 'object') return ''
-    const node = n as { text?: string; children?: unknown[] }
-    if (typeof node.text === 'string') return node.text
-    return (node.children ?? []).map(walk).join(' ')
-  }
-  return walk((value as { root?: unknown })?.root).replace(/\s+/g, ' ').trim()
-}

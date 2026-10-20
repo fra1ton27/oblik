@@ -44,8 +44,12 @@ export const budgetRanges = ['lt1000', '1000_3000', '3000_6000', 'gt6000', 'unkn
 export const timeframes = ['asap', '1_2m', '3_6m', 'flexible'] as const
 export const channels = ['phone', 'whatsapp', 'viber', 'telegram', 'email'] as const
 
+// Размер в см строкой из поля ввода: пусто или целое 10–1000
 const dimension = z
-  .union([z.literal(''), z.coerce.number(msg('number')).int(msg('number')).min(10, msg('dimensions')).max(1000, msg('dimensions'))])
+  .string()
+  .trim()
+  .refine((v) => v === '' || /^\d+$/.test(v), msg('number'))
+  .refine((v) => v === '' || (Number(v) >= 10 && Number(v) <= 1000), msg('dimensions'))
   .optional()
 
 export const customSchema = z.object({

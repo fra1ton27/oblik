@@ -28,6 +28,10 @@ export const site = {
       lng: 20.4612,
     },
   },
+  features: {
+    /** WebGL-сцена витрины поверх CSS 3D-варианта (этап 6) */
+    showcaseWebGL: false,
+  },
   orderPrefix: 'OB',
   inquiryPrefix: 'Z',
   itemsPerPage: 24,

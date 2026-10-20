@@ -30,6 +30,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     const raf = (time: number) => instance.raf(time * 1000)
     gsap.ticker.add(raf)
     gsap.ticker.lagSmoothing(0)
+    // для отладки и e2e в dev: window.__lenis.scrollTo(…)
+    if (process.env.NODE_ENV !== 'production') (window as unknown as { __lenis?: Lenis }).__lenis = instance
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Lenis живёт только в браузере
     setLenis(instance)
 
