@@ -149,3 +149,42 @@ export const getSlugsById = (collection: 'products' | 'categories' | 'collection
     ['slugs', collection, String(id)],
     { tags: catalogTags },
   )()
+
+/** Полный товар для посадочной (варианты с материалами, дизайнер, коллекция, фото) */
+export const getProductBySlug = (slug: string, locale: Locale) =>
+  unstable_cache(
+    async (): Promise<Product | null> => {
+      const payload = await getPayloadClient()
+      const res = await payload.find({
+        collection: 'products',
+        where: { and: [{ slug: { equals: slug } }, { status: { equals: 'published' } }] },
+        locale,
+        depth: 2,
+        limit: 1,
+        overrideAccess: false,
+      })
+      return (res.docs[0] as Product | undefined) ?? null
+    },
+    ['product', locale, slug],
+    { tags: catalogTags },
+  )()
+
+/** Все локализованные слаги опубликованных товаров — для generateStaticParams и sitemap */
+export const getAllProductSlugs = () =>
+  unstable_cache(
+    async (): Promise<Array<{ id: number; slug: Partial<Record<Locale, string>>; updatedAt: string }>> => {
+      const payload = await getPayloadClient()
+      const res = await payload.find({
+        collection: 'products',
+        where: { status: { equals: 'published' } },
+        locale: 'all',
+        depth: 0,
+        limit: 1000,
+        pagination: false,
+        select: { slug: true, updatedAt: true } as never,
+      })
+      return (res.docs as unknown as Array<{ id: number; slug: Partial<Record<Locale, string>>; updatedAt: string }>).map((d) => ({ id: d.id, slug: d.slug ?? {}, updatedAt: d.updatedAt }))
+    },
+    ['product-slugs'],
+    { tags: catalogTags },
+  )()

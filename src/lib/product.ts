@@ -110,3 +110,37 @@ export function toCard(p: Product): ProductCard {
     },
   }
 }
+
+export type VariantDTO = {
+  sku: string
+  size: string | null
+  fabric: { id: number; title: string; color: string | null; image: string | null } | null
+  finish: { id: number; title: string; color: string | null; image: string | null } | null
+  label: string
+  price: number
+  inStock: boolean
+  leadTime: [number, number]
+  image: ReturnType<typeof toImage>
+}
+
+function materialOption(ref: unknown) {
+  const m = asMaterial(ref)
+  if (!m) return null
+  const swatch = m.swatch && typeof m.swatch === 'object' ? (m.swatch as Media) : null
+  return { id: m.id, title: m.title, color: m.swatchColor ?? null, image: toImage(swatch, 'thumb')?.src ?? null }
+}
+
+/** Варианты для выбора на посадочной: размер чипами, ткань/отделка свотчами */
+export function toVariantDTOs(p: Product): VariantDTO[] {
+  return (p.variants ?? []).map((v) => ({
+    sku: v.sku,
+    size: v.size ?? null,
+    fabric: materialOption(v.fabric),
+    finish: materialOption(v.finish),
+    label: variantLabel(v),
+    price: variantPrice(p, v),
+    inStock: (v.stock ?? 0) > 0,
+    leadTime: leadTime(p, v),
+    image: toImage(v.image, 'hero', p.title),
+  }))
+}

@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowUpDown, Columns2, Rows3, SlidersHorizontal, X } from 'lucide-react'
+import { ArrowUpDown, Columns2, Rows3, SlidersHorizontal } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { activeFilterCount, SORTS, type FacetCounts, type Sort } from '@/lib/catalog'
