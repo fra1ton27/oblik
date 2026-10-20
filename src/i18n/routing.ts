@@ -79,6 +79,8 @@ export const routing = defineRouting({
 })
 
 export type Pathname = keyof typeof routing.pathnames
+/** Маршруты без динамических сегментов — их можно передавать в Link строкой */
+export type StaticPathname = Exclude<Pathname, `${string}[${string}`>
 
 /** Значение для <html lang>: сербский пишем латиницей */
 export const htmlLang: Record<Locale, string> = { ru: 'ru', en: 'en', sr: 'sr-Latn' }

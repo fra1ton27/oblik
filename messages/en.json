@@ -35,7 +35,25 @@
     "items": "{count, plural, one {# item} other {# items}}",
     "weeks": "{min}–{max} wks",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "preloaderLabel": "Loading {brand}",
+    "cookies": {
+      "title": "We use cookies",
+      "text": "Essential cookies keep your basket and sign-in working. Analytics is only switched on with your consent.",
+      "necessaryOnly": "Essential only",
+      "acceptAll": "Accept all",
+      "customize": "Customise",
+      "settingsTitle": "Cookie settings",
+      "necessary": "Essential",
+      "necessaryText": "Basket, account sign-in, site language. These can’t be switched off.",
+      "analytics": "Analytics",
+      "analyticsText": "Anonymous visit statistics that help us improve the site.",
+      "marketing": "Marketing",
+      "marketingText": "Personalised offers and social media advertising.",
+      "save": "Save my choice",
+      "alwaysOn": "Always on",
+      "policyLink": "Read the policy"
+    }
   },
   "nav": {
     "home": "Home",
@@ -44,7 +62,19 @@
     "custom": "Made to measure",
     "about": "About",
     "contact": "Contact",
-    "delivery": "Delivery & payment"
+    "delivery": "Delivery & payment",
+    "mainLabel": "Main navigation",
+    "wishlist": "Wishlist",
+    "wishlistCount": "Wishlist: {count, plural, one {# item} other {# items}}",
+    "account": "Account",
+    "login": "Sign in",
+    "cart": "Basket",
+    "cartCount": "Basket: {count, plural, =0 {empty} one {# item} other {# items}}",
+    "homeLink": "{brand} — home",
+    "menuTitle": "Site menu",
+    "callUs": "Call us",
+    "writeUs": "Message us",
+    "showroom": "Showroom"
   },
   "home": {
     "heroLine1": "Form",
@@ -57,10 +87,41 @@
   },
   "footer": {
     "copyright": "© {year} {brand}. All rights reserved.",
-    "credit": "Design & development by {handle}"
+    "credit": "Design & development by {handle}",
+    "values": "furniture as form · handmade · oak and linen · made to measure · made in Belgrade",
+    "socialLabel": "Find us on social media and messengers",
+    "colCatalog": "Catalogue",
+    "colCustomers": "Customer care",
+    "colCompany": "Company",
+    "colSubscribe": "Newsletter",
+    "subscribeText": "New collections and pieces fresh from the workshop — once a month, no spam.",
+    "delivery": "Delivery & payment",
+    "warranty": "Warranty",
+    "care": "Furniture care",
+    "faq": "FAQ",
+    "about": "About us",
+    "production": "Our workshop",
+    "custom": "Made to measure",
+    "contact": "Contact & showroom",
+    "allCatalog": "Full catalogue",
+    "collections": "Collections & sets",
+    "privacy": "Privacy policy",
+    "terms": "Terms of sale",
+    "cookieSettings": "Cookie settings",
+    "legalLabel": "Legal information",
+    "creditLabel": "Developer credit"
   },
   "errors": {
-    "notFoundTitle": "This page doesn’t exist, but our furniture does"
+    "notFoundTitle": "This page doesn’t exist, but our furniture does",
+    "notFoundText": "The link may be out of date or there could be a typo in the address. The catalogue is right where it should be.",
+    "toHome": "Go home",
+    "toCatalog": "Browse the catalogue",
+    "gameTitle": "Build the shelf",
+    "gameHint": "Place the blocks on the grid to build “404”.",
+    "gameReset": "Start over",
+    "gameCell": "Cell {index}",
+    "gameProgress": "{correct} of {total} placed",
+    "gameDone": "Done! The shelf is built — the catalogue awaits."
   },
   "forms": {
     "optional": "(optional)",
@@ -75,7 +136,13 @@
     "fileCountError": "You can attach up to {max} files",
     "fileRemove": "Remove file {name}",
     "send": "Send",
-    "sending": "Sending…"
+    "sending": "Sending…",
+    "email": "Email",
+    "emailPlaceholder": "Your email",
+    "subscribe": "Subscribe",
+    "newsletterConsent": "I agree to receive emails and accept the privacy policy",
+    "newsletterDone": "You’re in! The first email arrives with our next collection.",
+    "retry": "Try again"
   },
   "uiKit": {
     "title": "UI kit",
@@ -169,5 +236,25 @@
     "motion": "Motion",
     "diacriticsLetters": "ČĆĐŠŽ čćđšž",
     "diacriticsSample": "Čaša ćevapa, đak, šuma, žuta"
+  },
+  "validation": {
+    "required": "Please fill in this field",
+    "email": "Please check the email, e.g. name@mail.com",
+    "phone": "Please check the phone number",
+    "contactRequired": "Please give us a phone number or an email",
+    "consent": "We need your consent",
+    "tooShort": "Too short",
+    "tooLong": "Too long",
+    "passwordShort": "Use at least 8 characters",
+    "passwordMismatch": "Passwords don’t match",
+    "number": "Please enter a number",
+    "dimensions": "Use a size between 10 and 1000 cm",
+    "date": "Please check the date",
+    "files": "Please check the files",
+    "choose": "Please choose an option",
+    "generic": "Something went wrong. Please try again.",
+    "network": "Can’t reach the server. Your details are safe.",
+    "rateLimited": "Too many attempts. Please try again in 10 minutes.",
+    "spam": "The form was sent too quickly. Please try again."
   }
 }

@@ -35,7 +35,25 @@
     "items": "{count, plural, one {# proizvod} few {# proizvoda} other {# proizvoda}}",
     "weeks": "{min}–{max} ned.",
     "yes": "Da",
-    "no": "Ne"
+    "no": "Ne",
+    "preloaderLabel": "Učitavamo {brand}",
+    "cookies": {
+      "title": "Koristimo kolačiće",
+      "text": "Neophodni kolačići su potrebni za korpu i prijavu. Analitiku uključujemo samo uz vašu saglasnost.",
+      "necessaryOnly": "Samo neophodni",
+      "acceptAll": "Prihvati sve",
+      "customize": "Podesi",
+      "settingsTitle": "Podešavanja kolačića",
+      "necessary": "Neophodni",
+      "necessaryText": "Korpa, prijava na nalog, jezik sajta. Ne mogu se isključiti.",
+      "analytics": "Analitika",
+      "analyticsText": "Anonimna statistika poseta koja nam pomaže da poboljšamo sajt.",
+      "marketing": "Marketing",
+      "marketingText": "Lične ponude i oglasi na društvenim mrežama.",
+      "save": "Sačuvaj izbor",
+      "alwaysOn": "Uvek uključeni",
+      "policyLink": "Više u politici"
+    }
   },
   "nav": {
     "home": "Početna",
@@ -44,7 +62,19 @@
     "custom": "Po meri",
     "about": "O nama",
     "contact": "Kontakt",
-    "delivery": "Dostava i plaćanje"
+    "delivery": "Dostava i plaćanje",
+    "mainLabel": "Glavna navigacija",
+    "wishlist": "Omiljeno",
+    "wishlistCount": "Omiljeno: {count, plural, one {# proizvod} few {# proizvoda} other {# proizvoda}}",
+    "account": "Moj nalog",
+    "login": "Prijava",
+    "cart": "Korpa",
+    "cartCount": "Korpa: {count, plural, =0 {prazna} one {# proizvod} few {# proizvoda} other {# proizvoda}}",
+    "homeLink": "{brand} — početna",
+    "menuTitle": "Meni sajta",
+    "callUs": "Pozovite",
+    "writeUs": "Pišite nam",
+    "showroom": "Šou-rum"
   },
   "home": {
     "heroLine1": "Forma",
@@ -57,10 +87,41 @@
   },
   "footer": {
     "copyright": "© {year} {brand}. Sva prava zadržana.",
-    "credit": "Dizajn i razvoj — {handle}"
+    "credit": "Dizajn i razvoj — {handle}",
+    "values": "nameštaj kao forma · ručni rad · hrast i lan · po vašoj meri · napravljeno u Beogradu",
+    "socialLabel": "Pratite nas na mrežama i u mesindžerima",
+    "colCatalog": "Katalog",
+    "colCustomers": "Za kupce",
+    "colCompany": "Kompanija",
+    "colSubscribe": "Bilten",
+    "subscribeText": "Nove kolekcije i komadi iz radionice — jednom mesečno, bez spama.",
+    "delivery": "Dostava i plaćanje",
+    "warranty": "Garancija",
+    "care": "Održavanje nameštaja",
+    "faq": "Pitanja i odgovori",
+    "about": "O nama",
+    "production": "Proizvodnja",
+    "custom": "Nameštaj po meri",
+    "contact": "Kontakt i šou-rum",
+    "allCatalog": "Ceo katalog",
+    "collections": "Kolekcije i kompleti",
+    "privacy": "Politika privatnosti",
+    "terms": "Uslovi prodaje",
+    "cookieSettings": "Podešavanja kolačića",
+    "legalLabel": "Pravne informacije",
+    "creditLabel": "Potpis autora"
   },
   "errors": {
-    "notFoundTitle": "Ova stranica ne postoji, ali naš nameštaj postoji"
+    "notFoundTitle": "Ova stranica ne postoji, ali naš nameštaj postoji",
+    "notFoundText": "Možda je link zastareo ili postoji greška u adresi. Katalog je tamo gde treba da bude.",
+    "toHome": "Na početnu",
+    "toCatalog": "U katalog",
+    "gameTitle": "Složi policu",
+    "gameHint": "Rasporedite blokove po poljima da biste složili „404”.",
+    "gameReset": "Ispočetka",
+    "gameCell": "Polje {index}",
+    "gameProgress": "Složeno {correct} od {total}",
+    "gameDone": "Gotovo! Polica je složena — sada pravo u katalog."
   },
   "forms": {
     "optional": "(nije obavezno)",
@@ -75,7 +136,13 @@
     "fileCountError": "Možete priložiti najviše {max} fajlova",
     "fileRemove": "Ukloni fajl {name}",
     "send": "Pošalji",
-    "sending": "Šaljemo…"
+    "sending": "Šaljemo…",
+    "email": "Email",
+    "emailPlaceholder": "Vaš email",
+    "subscribe": "Prijavi se",
+    "newsletterConsent": "Slažem se da primam mejlove i prihvatam politiku privatnosti",
+    "newsletterDone": "Gotovo! Prvo pismo stiže sa novom kolekcijom.",
+    "retry": "Pokušaj ponovo"
   },
   "uiKit": {
     "title": "UI kit",
@@ -169,5 +236,25 @@
     "motion": "Pokret",
     "diacriticsLetters": "ČĆĐŠŽ čćđšž",
     "diacriticsSample": "Čaša ćevapa, đak, šuma, žuta"
+  },
+  "validation": {
+    "required": "Popunite ovo polje",
+    "email": "Proverite email, na primer ime@mail.com",
+    "phone": "Proverite broj telefona",
+    "contactRequired": "Navedite telefon ili email — bar jedno",
+    "consent": "Potrebna je vaša saglasnost",
+    "tooShort": "Prekratko",
+    "tooLong": "Predugačko",
+    "passwordShort": "Lozinka mora imati najmanje 8 znakova",
+    "passwordMismatch": "Lozinke se ne poklapaju",
+    "number": "Unesite broj",
+    "dimensions": "Mera od 10 do 1000 cm",
+    "date": "Proverite datum",
+    "files": "Proverite fajlove",
+    "choose": "Izaberite opciju",
+    "generic": "Nešto nije u redu. Pokušajte ponovo.",
+    "network": "Nema veze sa serverom. Podaci nisu izgubljeni.",
+    "rateLimited": "Previše pokušaja. Pokušajte ponovo za 10 minuta.",
+    "spam": "Forma je poslata prebrzo. Pokušajte ponovo."
   }
 }

@@ -1,7 +1,6 @@
 import '@/styles/globals.css'
 import type { Metadata, Viewport } from 'next'
 import { notFound } from 'next/navigation'
-import Script from 'next/script'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { htmlLang, routing } from '@/i18n/routing'
@@ -10,6 +9,9 @@ import { fontVariables } from '../fonts'
 import { PageTransitionProvider } from '@/components/motion/PageTransition'
 import { Toaster } from '@/components/ui/Toast'
 import { ClientBoot } from '@/components/layout/ClientBoot'
+import { SmoothScroll } from '@/components/motion/SmoothScroll'
+import { Preloader } from '@/components/motion/Preloader'
+import { CookieConsent } from '@/components/layout/CookieConsent'
 
 type Props = {
   children: React.ReactNode
@@ -44,7 +46,8 @@ export const viewport: Viewport = {
 }
 
 // Стартовые состояния анимаций ставятся только когда JS жив; страховка снимает их через 4 с.
-const jsReadyScript = `(function(){var d=document.documentElement;d.classList.add('js-ready');setTimeout(function(){if(!window.__oblikHydrated)d.classList.remove('js-ready')},4000)})();`
+// Там же решается, показывать ли прелоадер (первый визит в сессии, без reduced motion).
+const bootScript = `(function(){var d=document.documentElement;d.classList.add('js-ready');try{if(!sessionStorage.getItem('oblik-preloaded')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('show-preloader')}}catch(e){}setTimeout(function(){if(!window.__oblikHydrated){d.classList.remove('js-ready');d.classList.remove('show-preloader')}},4000)})();`
 
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params
@@ -53,16 +56,21 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={htmlLang[locale]} className={fontVariables} suppressHydrationWarning>
+      <head>
+        {/* Выполняется до первой отрисовки: next/script beforeInteractive ставится в очередь бандла и опоздал бы */}
+        <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+      </head>
       <body>
-        <Script id="js-ready" strategy="beforeInteractive">
-          {jsReadyScript}
-        </Script>
         <NextIntlClientProvider>
-          <PageTransitionProvider>
-            {children}
-            <Toaster />
-            <ClientBoot />
-          </PageTransitionProvider>
+          <SmoothScroll>
+            <PageTransitionProvider>
+              {children}
+              <Toaster />
+              <CookieConsent />
+              <Preloader />
+              <ClientBoot />
+            </PageTransitionProvider>
+          </SmoothScroll>
         </NextIntlClientProvider>
       </body>
     </html>

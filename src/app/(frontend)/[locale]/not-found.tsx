@@ -1,10 +1,11 @@
-import { getTranslations } from 'next-intl/server'
+import { SiteChrome } from '@/components/layout/SiteChrome'
+import { NotFoundView } from '@/components/layout/NotFoundView'
 
-export default async function LocaleNotFound() {
-  const t = await getTranslations('errors')
+// notFound() вне группы (site): оборачиваем в шапку и подвал вручную
+export default function LocaleNotFound() {
   return (
-    <main id="main" className="container-site section-y">
-      <h1 className="t-h1">{t('notFoundTitle')}</h1>
-    </main>
+    <SiteChrome>
+      <NotFoundView />
+    </SiteChrome>
   )
 }

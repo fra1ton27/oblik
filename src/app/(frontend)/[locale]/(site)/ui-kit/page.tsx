@@ -40,7 +40,7 @@ export default async function UiKitPage({ params }: Props) {
   const tokens = parseColorTokens(readFileSync(path.join(process.cwd(), 'src/styles/tokens.css'), 'utf8'))
 
   return (
-    <main id="main" className="container-site pt-12 pb-24">
+    <div className="container-site pt-12 pb-24">
       <Breadcrumbs items={[{ label: tNav('home'), href: '/' }, { label: t('title') }]} />
       <h1 className="t-h1 mt-6">{t('title')}</h1>
       <p className="t-lead mt-4 max-w-2xl text-ink-soft">{t('lead')}</p>
@@ -184,6 +184,6 @@ export default async function UiKitPage({ params }: Props) {
           <Marquee items={t('marqueeWords').split(' · ')} itemClassName="font-display text-outline text-[clamp(48px,8vw,120px)] uppercase" duration={30} />
         </div>
       </Section>
-    </main>
+    </div>
   )
 }
