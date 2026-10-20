@@ -1,9 +1,9 @@
 /**
- * pnpm seed вЂ” РЅР°РїРѕР»РЅСЏРµС‚ Р±Р°Р·Сѓ РґРµРјРѕ-РґР°РЅРЅС‹РјРё (СЂР°Р·РґРµР» 12.4 РўР—). РРґРµРјРїРѕС‚РµРЅС‚РµРЅ: Р·Р°РїРёСЃРё РёС‰СѓС‚СЃСЏ
- * РїРѕ СѓСЃС‚РѕР№С‡РёРІС‹Рј РєР»СЋС‡Р°Рј (sku, email, РєРѕРґ, РєР»СЋС‡ СЃС‚СЂР°РЅРёС†С‹, СЂСѓСЃСЃРєРѕРµ РЅР°Р·РІР°РЅРёРµ) Рё РѕР±РЅРѕРІР»СЏСЋС‚СЃСЏ, Р° РЅРµ РґСѓР±Р»РёСЂСѓСЋС‚СЃСЏ.
+ * pnpm seed — наполняет базу демо-данными (раздел 12.4 ТЗ). Идемпотентен: записи ищутся
+ * по устойчивым ключам (sku, email, код, ключ страницы, русское название) и обновляются, а не дублируются.
  *
- * РџРµСЂРµРІРѕРґС‹: РґРѕРєСѓРјРµРЅС‚ СЃРѕР·РґР°С‘С‚СЃСЏ РЅР° СЂСѓСЃСЃРєРѕРј, Р·Р°С‚РµРј РѕР±РЅРѕРІР»СЏРµС‚СЃСЏ РґР»СЏ en Рё sr. id СЃС‚СЂРѕРє РјР°СЃСЃРёРІРѕРІ Рё Р±Р»РѕРєРѕРІ
- * РїРµСЂРµРЅРѕСЃСЏС‚СЃСЏ РёР· СЃРѕС…СЂР°РЅС‘РЅРЅРѕРіРѕ РґРѕРєСѓРјРµРЅС‚Р°, РёРЅР°С‡Рµ Р»РѕРєР°Р»РёР·РѕРІР°РЅРЅС‹Рµ РїРѕРґРїРѕР»СЏ РїРѕС‚РµСЂСЏР»РёСЃСЊ Р±С‹.
+ * Переводы: документ создаётся на русском, затем обновляется для en и sr. id строк массивов и блоков
+ * переносятся из сохранённого документа, иначе локализованные подполя потерялись бы.
  */
 import crypto from 'node:crypto'
 import { getPayload, type Payload } from 'payload'
@@ -24,18 +24,18 @@ const eur = (n: number) => Math.round(n * 100)
 
 let payload: Payload
 
-// в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ СѓС‚РёР»РёС‚С‹ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+// ───────── утилиты ─────────
 
-/** РџСЂРѕРІРµСЂРєР°: СЃРµСЂР±СЃРєРёРµ СЃС‚СЂРѕРєРё С‚РѕР»СЊРєРѕ Р»Р°С‚РёРЅРёС†РµР№ */
+/** Проверка: сербские строки только латиницей */
 function assertLatinSr(value: unknown, path = ''): void {
   if (!value || typeof value !== 'object') return
   for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-    if (k === 'sr' && typeof v === 'string' && /[РЂ-Уї]/.test(v)) throw new Error(`РљРёСЂРёР»Р»РёС†Р° РІ sr: ${path}.${k} вЂ” ${v}`)
+    if (k === 'sr' && typeof v === 'string' && /[Ѐ-ӿ]/.test(v)) throw new Error(`Кириллица в sr: ${path}.${k} — ${v}`)
     assertLatinSr(v, `${path}.${k}`)
   }
 }
 
-/** РџРµСЂРµРЅРѕСЃРёС‚ id СЃС‚СЂРѕРє РјР°СЃСЃРёРІРѕРІ/Р±Р»РѕРєРѕРІ РёР· СЃРѕС…СЂР°РЅС‘РЅРЅРѕРіРѕ РґРѕРєСѓРјРµРЅС‚Р° РІ РґР°РЅРЅС‹Рµ РґСЂСѓРіРѕР№ Р»РѕРєР°Р»Рё */
+/** Переносит id строк массивов/блоков из сохранённого документа в данные другой локали */
 function withIds<T>(data: T, saved: unknown): T {
   if (Array.isArray(data)) {
     const arr = Array.isArray(saved) ? saved : []
@@ -55,7 +55,7 @@ function withIds<T>(data: T, saved: unknown): T {
 }
 
 
-/** РЎРѕР·РґР°С‘С‚/РѕР±РЅРѕРІР»СЏРµС‚ Р»РѕРєР°Р»РёР·РѕРІР°РЅРЅС‹Р№ РґРѕРєСѓРјРµРЅС‚: build(locale) РІРѕР·РІСЂР°С‰Р°РµС‚ РґР°РЅРЅС‹Рµ РґР»СЏ Р»РѕРєР°Р»Рё */
+/** Создаёт/обновляет локализованный документ: build(locale) возвращает данные для локали */
 async function upsertLocalized(
   collection: 'categories' | 'materials' | 'collections' | 'products' | 'pages' | 'designers',
   where: Record<string, unknown>,
@@ -110,16 +110,16 @@ async function upsertMedia(key: string, make: () => Promise<Buffer>, alt: T3, to
 }
 
 
-// в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ С€Р°РіРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+// ───────── шаги ─────────
 
 async function seedAdmin() {
   const email = process.env.SEED_ADMIN_EMAIL
   const password = process.env.SEED_ADMIN_PASSWORD
-  if (!email || !password) throw new Error('SEED_ADMIN_EMAIL Рё SEED_ADMIN_PASSWORD РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р·Р°РґР°РЅС‹ РІ .env')
+  if (!email || !password) throw new Error('SEED_ADMIN_EMAIL и SEED_ADMIN_PASSWORD должны быть заданы в .env')
   const existing = await payload.find({ collection: 'users', where: { email: { equals: email } }, limit: 1, overrideAccess: true })
   if (!existing.docs[0]) {
     await payload.create({ collection: 'users', data: { email, password, name: 'Admin', role: 'admin' }, overrideAccess: true })
-    payload.logger.info(`seed: Р°РґРјРёРЅ ${email}`)
+    payload.logger.info(`seed: админ ${email}`)
   }
 }
 
@@ -187,13 +187,13 @@ async function seedCollections() {
     const hero = await upsertMedia(
       `collection-${c.key}-hero`,
       () => interiorImage({ wall: P[c.podiumColor], floor: '#D9C3A0', items: items.map((p) => ({ type: p.type, colors: p.colors })), seed: c.order, title: c.title.en }),
-      { ru: `РљРѕР»Р»РµРєС†РёСЏ В«${c.title.ru}В» РІ РёРЅС‚РµСЂСЊРµСЂРµ`, en: `${c.title.en} collection in an interior`, sr: `Kolekcija вЂћ${c.title.sr}вЂќ u enterijeru` },
+      { ru: `Коллекция «${c.title.ru}» в интерьере`, en: `${c.title.en} collection in an interior`, sr: `Kolekcija „${c.title.sr}” u enterijeru` },
       c.podiumColor,
     )
     const cutout = await upsertMedia(
       `collection-${c.key}-cutout`,
       () => cutoutImage({ type: items[0].type, colors: items[0].colors, types: items.map((p) => p.type) }),
-      { ru: `РљРѕРјРїР»РµРєС‚ В«${c.title.ru}В»`, en: `${c.title.en} set`, sr: `Komplet вЂћ${c.title.sr}вЂќ` },
+      { ru: `Комплект «${c.title.ru}»`, en: `${c.title.en} set`, sr: `Komplet „${c.title.sr}”` },
       c.podiumColor,
       'png',
     )
@@ -204,7 +204,7 @@ async function seedCollections() {
         await upsertMedia(
           `collection-${c.key}-gallery-${i}`,
           () => interiorImage({ wall: [P.milk, P.sand, P.mist][i], floor: '#CDB48F', items: pick.map((p) => ({ type: p.type, colors: p.colors })), seed: i + c.order }),
-          { ru: `РРЅС‚РµСЂСЊРµСЂ СЃ РєРѕР»Р»РµРєС†РёРµР№ В«${c.title.ru}В»`, en: `Interior with the ${c.title.en} collection`, sr: `Enterijer sa kolekcijom вЂћ${c.title.sr}вЂќ` },
+          { ru: `Интерьер с коллекцией «${c.title.ru}»`, en: `Interior with the ${c.title.en} collection`, sr: `Enterijer sa kolekcijom „${c.title.sr}”` },
         ),
       )
     }
@@ -230,17 +230,17 @@ async function seedCollections() {
 async function seedProducts(refs: { materials: Record<string, number>; designers: Record<string, number>; categories: Record<string, number>; collections: Record<string, number> }) {
   const ids: Record<string, number> = {}
   for (const p of products) {
-    const alt = (suffix: T3): T3 => ({ ru: `${p.title.ru} вЂ” ${suffix.ru}`, en: `${p.title.en} вЂ” ${suffix.en}`, sr: `${p.title.sr} вЂ” ${suffix.sr}` })
+    const alt = (suffix: T3): T3 => ({ ru: `${p.title.ru} — ${suffix.ru}`, en: `${p.title.en} — ${suffix.en}`, sr: `${p.title.sr} — ${suffix.sr}` })
     const images: number[] = []
     const views: Array<{ v: 0 | 1 | 2; label: T3 }> = [
-      { v: 0, label: { ru: 'РѕР±С‰РёР№ РІРёРґ', en: 'front view', sr: 'izgled spreda' } },
-      { v: 1, label: { ru: 'СЂР°РєСѓСЂСЃ РІ РёРЅС‚РµСЂСЊРµСЂРµ', en: 'angled view', sr: 'pogled iz ugla' } },
-      { v: 2, label: { ru: 'РґРµС‚Р°Р»СЊ РјР°С‚РµСЂРёР°Р»Р°', en: 'material detail', sr: 'detalj materijala' } },
+      { v: 0, label: { ru: 'общий вид', en: 'front view', sr: 'izgled spreda' } },
+      { v: 1, label: { ru: 'ракурс в интерьере', en: 'angled view', sr: 'pogled iz ugla' } },
+      { v: 2, label: { ru: 'деталь материала', en: 'material detail', sr: 'detalj materijala' } },
     ]
     for (const { v, label } of views) {
       images.push(await upsertMedia(`product-${p.key}-${v}`, () => productImage({ type: p.type, colors: p.colors, bg: P[p.podiumColor], title: p.model, view: v }), alt(label), p.podiumColor))
     }
-    const cutout = await upsertMedia(`product-${p.key}-cutout`, () => cutoutImage({ type: p.type, colors: p.colors }), alt({ ru: 'РІС‹СЂРµР·РєР°', en: 'cut-out', sr: 'izrez' }), p.podiumColor, 'png')
+    const cutout = await upsertMedia(`product-${p.key}-cutout`, () => cutoutImage({ type: p.type, colors: p.colors }), alt({ ru: 'вырезка', en: 'cut-out', sr: 'izrez' }), p.podiumColor, 'png')
     const sku = `OB-${p.key.toUpperCase().replace(/[^A-Z0-9]+/g, '-')}`
     const basePrice = Math.min(...p.variants.map((v) => v.price))
     const stock = p.variants.reduce((sum, v) => sum + (v.stock ?? 0), 0)
@@ -277,11 +277,11 @@ async function seedProducts(refs: { materials: Record<string, number>; designers
       featured: Boolean(p.featured),
       popularity: p.popularity,
       status: 'published',
-      meta: { title: `${p.title[l]} вЂ” ${site.name}`, description: p.short[l], image: images[0] },
+      meta: { title: `${p.title[l]} — ${site.name}`, description: p.short[l], image: images[0] },
       faq: [],
     }))
   }
-  // СЃРѕСЃС‚Р°РІ РєРѕР»Р»РµРєС†РёР№
+  // состав коллекций
   for (const c of collections) {
     await payload.update({
       collection: 'collections',
@@ -304,7 +304,7 @@ async function seedReviews(productIds: Record<string, number>) {
           await upsertMedia(
             `review-${i}`,
             () => interiorImage({ wall: [P.blush, P.mist, P.pistachio, P.lavender][i % 4], floor: '#D2B892', items: [{ type: p.type, colors: p.colors }], seed: i }),
-            { ru: `Р¤РѕС‚Рѕ РїРѕРєСѓРїР°С‚РµР»СЏ: ${p.title.ru}`, en: `Customer photo: ${p.title.en}`, sr: `Fotografija kupca: ${p.title.sr}` },
+            { ru: `Фото покупателя: ${p.title.ru}`, en: `Customer photo: ${p.title.en}`, sr: `Fotografija kupca: ${p.title.sr}` },
           ),
         ]
       : []
@@ -318,7 +318,7 @@ async function seedReviews(productIds: Record<string, number>) {
   return ids
 }
 
-/** РРЅС‚РµСЂСЊРµСЂС‹ РєР»РёРµРЅС‚РѕРІ РґР»СЏ РїРѕР»РѕС‚РЅР° РЅР° РіР»Р°РІРЅРѕР№ */
+/** Интерьеры клиентов для полотна на главной */
 async function seedInteriors() {
   const combos: Array<{ items: string[]; wall: string }> = [
     { items: ['sofa-oblako', 'coffee-krug', 'lamp-luna'], wall: P.lavender },
@@ -337,7 +337,7 @@ async function seedInteriors() {
       await upsertMedia(
         `interior-${i}`,
         () => interiorImage({ wall: c.wall, floor: '#D4BC95', items: items.map((p) => ({ type: p.type, colors: p.colors })), seed: i }),
-        { ru: `РРЅС‚РµСЂСЊРµСЂ РєР»РёРµРЅС‚Р°: ${items[0].title.ru}`, en: `Customer interior: ${items[0].title.en}`, sr: `Enterijer kupca: ${items[0].title.sr}` },
+        { ru: `Интерьер клиента: ${items[0].title.ru}`, en: `Customer interior: ${items[0].title.en}`, sr: `Enterijer kupca: ${items[0].title.sr}` },
       ),
     )
   }
@@ -351,11 +351,11 @@ async function seedPages(media: { workshop: number[]; interiors: number[] }) {
         return [
           {
             blockType: 'story',
-            heading: { ru: 'РќР°С‡Р°Р»Рё СЃ РѕРґРЅРѕРіРѕ СЃС‚СѓР»Р°', en: 'It started with a single chair', sr: 'PoДЌeli smo od jedne stolice' }[l],
+            heading: { ru: 'Начали с одного стула', en: 'It started with a single chair', sr: 'Počeli smo od jedne stolice' }[l],
             text: {
-              ru: 'Р’ 2016 РіРѕРґСѓ РђРЅР° Рё РњР°СЂРєРѕ СЃРґРµР»Р°Р»Рё РїРµСЂРІС‹Р№ СЃС‚СѓР» РґР»СЏ СЃРѕР±СЃС‚РІРµРЅРЅРѕР№ РєСѓС…РЅРё вЂ” РґСЂСѓР·СЊСЏ РїРѕРїСЂРѕСЃРёР»Рё РµС‰С‘ РІРѕСЃРµРјСЊ. РЎРµРіРѕРґРЅСЏ РІ С†РµС…Рµ РЅР° Р§СѓРєР°СЂРёС†Рµ СЂР°Р±РѕС‚Р°СЋС‚ 24 С‡РµР»РѕРІРµРєР°, Р° РєР°Р¶РґР°СЏ РІРµС‰СЊ РїРѕ-РїСЂРµР¶РЅРµРјСѓ РїСЂРѕС…РѕРґРёС‚ С‡РµСЂРµР· СЂСѓРєРё РґРёР·Р°Р№РЅРµСЂР°.',
-              en: 'In 2016 Ana and Marko made their first chair for their own kitchen вЂ” friends asked for eight more. Today 24 people work in our ДЊukarica workshop, and every piece still passes through a designerвЂ™s hands.',
-              sr: 'Ana i Marko su 2016. napravili prvu stolicu za svoju kuhinju вЂ” prijatelji su traЕѕili joЕЎ osam. Danas u radionici na ДЊukarici radi 24 ljudi, a svaki komad i dalje prolazi kroz ruke dizajnera.',
+              ru: 'В 2016 году Ана и Марко сделали первый стул для собственной кухни — друзья попросили ещё восемь. Сегодня в цехе на Чукарице работают 24 человека, а каждая вещь по-прежнему проходит через руки дизайнера.',
+              en: 'In 2016 Ana and Marko made their first chair for their own kitchen — friends asked for eight more. Today 24 people work in our Čukarica workshop, and every piece still passes through a designer’s hands.',
+              sr: 'Ana i Marko su 2016. napravili prvu stolicu za svoju kuhinju — prijatelji su tražili još osam. Danas u radionici na Čukarici radi 24 ljudi, a svaki komad i dalje prolazi kroz ruke dizajnera.',
             }[l],
             quote: designers[0].quote[l],
             quoteAuthor: designers[0].name,
@@ -363,32 +363,32 @@ async function seedPages(media: { workshop: number[]; interiors: number[] }) {
           },
           {
             blockType: 'stackedCards',
-            heading: { ru: 'РљР°Рє РјС‹ РґРµР»Р°РµРј РјРµР±РµР»СЊ', en: 'How we make furniture', sr: 'Kako pravimo nameЕЎtaj' }[l],
+            heading: { ru: 'Как мы делаем мебель', en: 'How we make furniture', sr: 'Kako pravimo nameštaj' }[l],
             source: 'manual',
             cards: productionSteps.map((s, i) => ({ title: s.title[l], text: s.text[l], color: s.color, image: media.workshop[i % media.workshop.length] })),
           },
           {
             blockType: 'stats',
-            heading: { ru: 'Р¦РµС… РІ С†РёС„СЂР°С…', en: 'The workshop in numbers', sr: 'Radionica u brojkama' }[l],
+            heading: { ru: 'Цех в цифрах', en: 'The workshop in numbers', sr: 'Radionica u brojkama' }[l],
             items: [
-              { value: 1200, suffix: { ru: 'РјВІ', en: 'mВІ', sr: 'mВІ' }[l], label: { ru: 'С†РµС… Рё Р°С‚РµР»СЊРµ РІ Р‘РµР»РіСЂР°РґРµ', en: 'workshop and studio in Belgrade', sr: 'radionica i atelje u Beogradu' }[l] },
-              { value: 24, suffix: '', label: { ru: 'РјР°СЃС‚РµСЂР° Рё РґРёР·Р°Р№РЅРµСЂС‹', en: 'makers and designers', sr: 'majstora i dizajnera' }[l] },
-              { value: 3400, suffix: '+', label: { ru: 'РїСЂРµРґРјРµС‚РѕРІ РІ РґРѕРјР°С… РєР»РёРµРЅС‚РѕРІ', en: 'pieces in clientsвЂ™ homes', sr: 'komada u domovima kupaca' }[l] },
+              { value: 1200, suffix: { ru: 'м²', en: 'm²', sr: 'm²' }[l], label: { ru: 'цех и ателье в Белграде', en: 'workshop and studio in Belgrade', sr: 'radionica i atelje u Beogradu' }[l] },
+              { value: 24, suffix: '', label: { ru: 'мастера и дизайнеры', en: 'makers and designers', sr: 'majstora i dizajnera' }[l] },
+              { value: 3400, suffix: '+', label: { ru: 'предметов в домах клиентов', en: 'pieces in clients’ homes', sr: 'komada u domovima kupaca' }[l] },
             ],
           },
-          { blockType: 'gallery', heading: { ru: 'Р¤РѕС‚Рѕ С†РµС…Р°', en: 'Inside the workshop', sr: 'Iz radionice' }[l], images: media.workshop },
-          { blockType: 'materials', heading: { ru: 'РњР°С‚РµСЂРёР°Р»С‹', en: 'Materials', sr: 'Materijali' }[l] },
+          { blockType: 'gallery', heading: { ru: 'Фото цеха', en: 'Inside the workshop', sr: 'Iz radionice' }[l], images: media.workshop },
+          { blockType: 'materials', heading: { ru: 'Материалы', en: 'Materials', sr: 'Materijali' }[l] },
         ]
       if (page.key === 'custom')
         return [
           {
             blockType: 'stackedCards',
-            heading: { ru: 'РљР°Рє РїСЂРѕС…РѕРґРёС‚ СЂР°Р±РѕС‚Р°', en: 'How it works', sr: 'Kako radimo' }[l],
+            heading: { ru: 'Как проходит работа', en: 'How it works', sr: 'Kako radimo' }[l],
             source: 'manual',
             cards: customSteps.map((s, i) => ({ title: s.title[l], text: s.text[l], color: (['lavender', 'pistachio', 'blush', 'mist', 'sand'] as const)[i] })),
           },
-          { blockType: 'gallery', heading: { ru: 'РџСЂРёРјРµСЂС‹ СЂР°Р±РѕС‚', en: 'Recent commissions', sr: 'Primeri radova' }[l], images: media.interiors.slice(0, 4) },
-          { blockType: 'faq', heading: { ru: 'Р§Р°СЃС‚С‹Рµ РІРѕРїСЂРѕСЃС‹', en: 'Frequently asked questions', sr: 'ДЊesta pitanja' }[l], items: customFaq.map((f) => ({ question: f.q[l], answer: f.a[l] })) },
+          { blockType: 'gallery', heading: { ru: 'Примеры работ', en: 'Recent commissions', sr: 'Primeri radova' }[l], images: media.interiors.slice(0, 4) },
+          { blockType: 'faq', heading: { ru: 'Частые вопросы', en: 'Frequently asked questions', sr: 'Česta pitanja' }[l], items: customFaq.map((f) => ({ question: f.q[l], answer: f.a[l] })) },
         ]
       return []
     }
@@ -413,7 +413,7 @@ async function updateGlobalLocalized(slug: 'header' | 'footer' | 'homepage' | 's
 }
 
 async function seedGlobals(media: { hero: number; interiors: number[]; map: number }, reviewIds: number[], categoryIds: Record<string, number>) {
-  const nav = { catalog: { ru: 'РљР°С‚Р°Р»РѕРі', en: 'Catalogue', sr: 'Katalog' }, collections: { ru: 'РљРѕР»Р»РµРєС†РёРё', en: 'Collections', sr: 'Kolekcije' }, custom: { ru: 'РќР° Р·Р°РєР°Р·', en: 'Made to measure', sr: 'Po meri' }, about: { ru: 'Рћ РЅР°СЃ', en: 'About', sr: 'O nama' }, contact: { ru: 'РљРѕРЅС‚Р°РєС‚С‹', en: 'Contact', sr: 'Kontakt' } }
+  const nav = { catalog: { ru: 'Каталог', en: 'Catalogue', sr: 'Katalog' }, collections: { ru: 'Коллекции', en: 'Collections', sr: 'Kolekcije' }, custom: { ru: 'На заказ', en: 'Made to measure', sr: 'Po meri' }, about: { ru: 'О нас', en: 'About', sr: 'O nama' }, contact: { ru: 'Контакты', en: 'Contact', sr: 'Kontakt' } }
   await updateGlobalLocalized('header', (l) => ({
     items: [
       { label: nav.catalog[l], route: '/catalog' },
@@ -427,25 +427,25 @@ async function seedGlobals(media: { hero: number; interiors: number[]; map: numb
   await updateGlobalLocalized('footer', (l) => ({
     columns: [
       {
-        title: { ru: 'РљР°С‚Р°Р»РѕРі', en: 'Catalogue', sr: 'Katalog' }[l],
+        title: { ru: 'Каталог', en: 'Catalogue', sr: 'Katalog' }[l],
         links: categories.map((c) => ({ label: c.title[l], category: categoryIds[c.key] })),
       },
       {
-        title: { ru: 'РџРѕРєСѓРїР°С‚РµР»СЏРј', en: 'Customer care', sr: 'Za kupce' }[l],
+        title: { ru: 'Покупателям', en: 'Customer care', sr: 'Za kupce' }[l],
         links: [
-          { label: { ru: 'Р”РѕСЃС‚Р°РІРєР° Рё РѕРїР»Р°С‚Р°', en: 'Delivery & payment', sr: 'Dostava i plaД‡anje' }[l], route: '/delivery' },
-          { label: { ru: 'Р“Р°СЂР°РЅС‚РёСЏ', en: 'Warranty', sr: 'Garancija' }[l], route: '/delivery', hash: 'warranty' },
-          { label: { ru: 'РЈС…РѕРґ Р·Р° РјРµР±РµР»СЊСЋ', en: 'Furniture care', sr: 'OdrЕѕavanje nameЕЎtaja' }[l], route: '/delivery', hash: 'care' },
-          { label: { ru: 'Р’РѕРїСЂРѕСЃС‹ Рё РѕС‚РІРµС‚С‹', en: 'FAQ', sr: 'Pitanja i odgovori' }[l], route: '/delivery', hash: 'faq' },
+          { label: { ru: 'Доставка и оплата', en: 'Delivery & payment', sr: 'Dostava i plaćanje' }[l], route: '/delivery' },
+          { label: { ru: 'Гарантия', en: 'Warranty', sr: 'Garancija' }[l], route: '/delivery', hash: 'warranty' },
+          { label: { ru: 'Уход за мебелью', en: 'Furniture care', sr: 'Održavanje nameštaja' }[l], route: '/delivery', hash: 'care' },
+          { label: { ru: 'Вопросы и ответы', en: 'FAQ', sr: 'Pitanja i odgovori' }[l], route: '/delivery', hash: 'faq' },
         ],
       },
       {
-        title: { ru: 'РљРѕРјРїР°РЅРёСЏ', en: 'Company', sr: 'Kompanija' }[l],
+        title: { ru: 'Компания', en: 'Company', sr: 'Kompanija' }[l],
         links: [
-          { label: { ru: 'Рћ РЅР°СЃ', en: 'About us', sr: 'O nama' }[l], route: '/about' },
-          { label: { ru: 'РџСЂРѕРёР·РІРѕРґСЃС‚РІРѕ', en: 'Our workshop', sr: 'Proizvodnja' }[l], route: '/about', hash: 'production' },
-          { label: { ru: 'РњРµР±РµР»СЊ РЅР° Р·Р°РєР°Р·', en: 'Made to measure', sr: 'NameЕЎtaj po meri' }[l], route: '/custom' },
-          { label: { ru: 'РљРѕРЅС‚Р°РєС‚С‹ Рё С€РѕСѓСЂСѓРј', en: 'Contact & showroom', sr: 'Kontakt i ЕЎou-rum' }[l], route: '/contact' },
+          { label: { ru: 'О нас', en: 'About us', sr: 'O nama' }[l], route: '/about' },
+          { label: { ru: 'Производство', en: 'Our workshop', sr: 'Proizvodnja' }[l], route: '/about', hash: 'production' },
+          { label: { ru: 'Мебель на заказ', en: 'Made to measure', sr: 'Nameštaj po meri' }[l], route: '/custom' },
+          { label: { ru: 'Контакты и шоурум', en: 'Contact & showroom', sr: 'Kontakt i šou-rum' }[l], route: '/contact' },
         ],
       },
     ],
@@ -465,11 +465,11 @@ async function seedGlobals(media: { hero: number; interiors: number[]; map: numb
     whatsapp: site.contacts.whatsapp,
     viber: site.contacts.viber,
     telegram: site.contacts.telegram,
-    address: { ru: 'Р‘РµР»РіСЂР°Рґ, СѓР». РљР°СЂР°С’РѕСЂС’РµРІР°, 42 (РЎР°РІР°РјР°Р»Р°)', en: '42 KaraД‘orД‘eva St, Savamala, Belgrade', sr: 'KaraД‘orД‘eva 42, Savamala, Beograd' }[l],
+    address: { ru: 'Белград, ул. Карађорђева, 42 (Савамала)', en: '42 Karađorđeva St, Savamala, Belgrade', sr: 'Karađorđeva 42, Savamala, Beograd' }[l],
     hours: [
-      { days: { ru: 'РџРЅвЂ“РџС‚', en: 'MonвЂ“Fri', sr: 'PonвЂ“Pet' }[l], time: '10:00вЂ“19:00' },
-      { days: { ru: 'РЎР±', en: 'Sat', sr: 'Sub' }[l], time: '11:00вЂ“17:00' },
-      { days: { ru: 'Р’СЃ', en: 'Sun', sr: 'Ned' }[l], time: { ru: 'РІС‹С…РѕРґРЅРѕР№', en: 'closed', sr: 'zatvoreno' }[l] },
+      { days: { ru: 'Пн–Пт', en: 'Mon–Fri', sr: 'Pon–Pet' }[l], time: '10:00–19:00' },
+      { days: { ru: 'Сб', en: 'Sat', sr: 'Sub' }[l], time: '11:00–17:00' },
+      { days: { ru: 'Вс', en: 'Sun', sr: 'Ned' }[l], time: { ru: 'выходной', en: 'closed', sr: 'zatvoreno' }[l] },
     ],
     mapLat: site.contacts.showroom.lat,
     mapLng: site.contacts.showroom.lng,
@@ -478,18 +478,18 @@ async function seedGlobals(media: { hero: number; interiors: number[]; map: numb
     displayCurrency: 'RSD',
     displayRate: 117.2,
     deliveryZones: [
-      { code: 'city', price: eur(40), freeFrom: eur(1500), label: { ru: 'Р”РѕСЃС‚Р°РІРєР° РїРѕ Р‘РµР»РіСЂР°РґСѓ', en: 'Belgrade delivery', sr: 'Dostava po Beogradu' }[l], description: { ru: '1вЂ“3 РґРЅСЏ РїРѕСЃР»Рµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё, Р±РµСЃРїР»Р°С‚РЅРѕ РѕС‚ 1 500 в‚¬', en: '1вЂ“3 days once ready, free over в‚¬1,500', sr: '1вЂ“3 dana nakon izrade, besplatno od 1.500 в‚¬' }[l] },
-      { code: 'country', price: eur(90), label: { ru: 'Р”РѕСЃС‚Р°РІРєР° РїРѕ РЎРµСЂР±РёРё', en: 'Delivery across Serbia', sr: 'Dostava po Srbiji' }[l], description: { ru: '3вЂ“5 РґРЅРµР№ РїРѕСЃР»Рµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё', en: '3вЂ“5 days once ready', sr: '3вЂ“5 dana nakon izrade' }[l] },
-      { code: 'pickup', price: 0, label: { ru: 'РЎР°РјРѕРІС‹РІРѕР· РёР· С€РѕСѓСЂСѓРјР°', en: 'Showroom pick-up', sr: 'Preuzimanje u ЕЎou-rumu' }[l], description: { ru: 'РЎР°РІР°РјР°Р»Р°, Р‘РµР»РіСЂР°Рґ', en: 'Savamala, Belgrade', sr: 'Savamala, Beograd' }[l] },
+      { code: 'city', price: eur(40), freeFrom: eur(1500), label: { ru: 'Доставка по Белграду', en: 'Belgrade delivery', sr: 'Dostava po Beogradu' }[l], description: { ru: '1–3 дня после готовности, бесплатно от 1 500 €', en: '1–3 days once ready, free over €1,500', sr: '1–3 dana nakon izrade, besplatno od 1.500 €' }[l] },
+      { code: 'country', price: eur(90), label: { ru: 'Доставка по Сербии', en: 'Delivery across Serbia', sr: 'Dostava po Srbiji' }[l], description: { ru: '3–5 дней после готовности', en: '3–5 days once ready', sr: '3–5 dana nakon izrade' }[l] },
+      { code: 'pickup', price: 0, label: { ru: 'Самовывоз из шоурума', en: 'Showroom pick-up', sr: 'Preuzimanje u šou-rumu' }[l], description: { ru: 'Савамала, Белград', en: 'Savamala, Belgrade', sr: 'Savamala, Beograd' }[l] },
     ],
     liftPrice: eur(20),
     liftPerFloor: eur(8),
     assemblyPrice: eur(45),
-    responseTime: { ru: 'РІ С‚РµС‡РµРЅРёРµ 2 С‡Р°СЃРѕРІ РІ СЂР°Р±РѕС‡РµРµ РІСЂРµРјСЏ', en: 'within 2 business hours', sr: 'u roku od 2 sata tokom radnog vremena' }[l],
+    responseTime: { ru: 'в течение 2 часов в рабочее время', en: 'within 2 business hours', sr: 'u roku od 2 sata tokom radnog vremena' }[l],
     managerEmails: process.env.MANAGER_EMAIL ? [{ email: process.env.MANAGER_EMAIL }] : [],
     defaultProductFaq: productFaq.map((f) => ({ question: f.q[l], answer: f.a[l] })),
     maintenance: false,
-    maintenanceMessage: { ru: 'РћР±РЅРѕРІР»СЏРµРј РІРёС‚СЂРёРЅСѓ. Р’РµСЂРЅС‘РјСЃСЏ С‡РµСЂРµР· РїР°СЂСѓ С‡Р°СЃРѕРІ.', en: 'We are refreshing the showroom. Back in a couple of hours.', sr: 'OsveЕѕavamo izlog. VraД‡amo se za par sati.' }[l],
+    maintenanceMessage: { ru: 'Обновляем витрину. Вернёмся через пару часов.', en: 'We are refreshing the showroom. Back in a couple of hours.', sr: 'Osvežavamo izlog. Vraćamo se za par sati.' }[l],
   }))
 
   await updateGlobalLocalized('homepage', (l) => ({
@@ -497,66 +497,66 @@ async function seedGlobals(media: { hero: number; interiors: number[]; map: numb
       {
         blockType: 'hero',
         variant: 'home',
-        chip: { ru: 'РќРѕРІР°СЏ РєРѕР»Р»РµРєС†РёСЏ В«РћР±Р»Р°РєРѕВ»', en: 'New: the Oblako collection', sr: 'Nova kolekcija вЂћOblakвЂќ' }[l],
-        lines: [{ text: { ru: 'Р¤РѕСЂРјР°', en: 'Form', sr: 'Forma' }[l] }, { text: { ru: 'СѓСЋС‚Р°', en: 'comfort', sr: 'udobnost' }[l] }],
+        chip: { ru: 'Новая коллекция «Облако»', en: 'New: the Oblako collection', sr: 'Nova kolekcija „Oblak”' }[l],
+        lines: [{ text: { ru: 'Форма', en: 'Form', sr: 'Forma' }[l] }, { text: { ru: 'уюта', en: 'comfort', sr: 'udobnost' }[l] }],
         lead: {
-          ru: 'РџСЂРѕРµРєС‚РёСЂСѓРµРј Рё РґРµР»Р°РµРј РјРµР±РµР»СЊ РІ Р‘РµР»РіСЂР°РґРµ: РёР· РјР°СЃСЃРёРІР°, Р»СЊРЅР° Рё РєР°РјРЅСЏ, РїРѕ РІР°С€РёРј СЂР°Р·РјРµСЂР°Рј.',
-          en: 'We design and make furniture in Belgrade вЂ” in solid wood, linen and stone, to your measurements.',
-          sr: 'Projektujemo i pravimo nameЕЎtaj u Beogradu вЂ” od masiva, lana i kamena, po vaЕЎoj meri.',
+          ru: 'Проектируем и делаем мебель в Белграде: из массива, льна и камня, по вашим размерам.',
+          en: 'We design and make furniture in Belgrade — in solid wood, linen and stone, to your measurements.',
+          sr: 'Projektujemo i pravimo nameštaj u Beogradu — od masiva, lana i kamena, po vašoj meri.',
         }[l],
         media: media.hero,
-        ctaLabel: { ru: 'РЎРјРѕС‚СЂРµС‚СЊ РєР°С‚Р°Р»РѕРі', en: 'Browse the catalogue', sr: 'Pogledaj katalog' }[l],
+        ctaLabel: { ru: 'Смотреть каталог', en: 'Browse the catalogue', sr: 'Pogledaj katalog' }[l],
         ctaRoute: '/catalog',
       },
-      { blockType: 'stackedCards', heading: { ru: 'РљР°С‚РµРіРѕСЂРёРё', en: 'Categories', sr: 'Kategorije' }[l], source: 'categories' },
+      { blockType: 'stackedCards', heading: { ru: 'Категории', en: 'Categories', sr: 'Kategorije' }[l], source: 'categories' },
       {
         blockType: 'showcase',
-        heading: { ru: 'РљРѕРјРїР»РµРєС‚С‹', en: 'Sets', sr: 'Kompleti' }[l],
-        lead: { ru: 'Р“РѕСЃС‚РёРЅР°СЏ Рё СЃС‚РѕР»РѕРІР°СЏ С†РµР»РёРєРѕРј вЂ” СЃРѕ СЃРєРёРґРєРѕР№ РєРѕРјРїР»РµРєС‚Р°.', en: 'A whole living or dining room вЂ” with a set discount.', sr: 'Cela dnevna soba ili trpezarija вЂ” uz popust za komplet.' }[l],
+        heading: { ru: 'Комплекты', en: 'Sets', sr: 'Kompleti' }[l],
+        lead: { ru: 'Гостиная и столовая целиком — со скидкой комплекта.', en: 'A whole living or dining room — with a set discount.', sr: 'Cela dnevna soba ili trpezarija — uz popust za komplet.' }[l],
         source: 'bundles',
       },
-      { blockType: 'productCarousel', heading: { ru: 'РҐРёС‚С‹ Рё РЅРѕРІРёРЅРєРё', en: 'Bestsellers & new', sr: 'Hitovi i novo' }[l], source: 'featured', showFilters: true, limit: 12 },
+      { blockType: 'productCarousel', heading: { ru: 'Хиты и новинки', en: 'Bestsellers & new', sr: 'Hitovi i novo' }[l], source: 'featured', showFilters: true, limit: 12 },
       {
         blockType: 'stats',
-        heading: { ru: 'РџСЂРѕРёР·РІРѕРґСЃС‚РІРѕ', en: 'Our workshop', sr: 'Proizvodnja' }[l],
-        lead: { ru: 'РЎРІРѕР№ С†РµС… РІ Р‘РµР»РіСЂР°РґРµ: РѕС‚ РґРѕСЃРєРё РґРѕ СЃР±РѕСЂРєРё Сѓ РІР°СЃ РґРѕРјР°.', en: 'Our own Belgrade workshop: from plank to assembly in your home.', sr: 'Sopstvena radionica u Beogradu: od daske do sklapanja kod vas.' }[l],
+        heading: { ru: 'Производство', en: 'Our workshop', sr: 'Proizvodnja' }[l],
+        lead: { ru: 'Свой цех в Белграде: от доски до сборки у вас дома.', en: 'Our own Belgrade workshop: from plank to assembly in your home.', sr: 'Sopstvena radionica u Beogradu: od daske do sklapanja kod vas.' }[l],
         items: [
-          { value: 6, suffix: { ru: 'РЅРµРґ.', en: 'wks', sr: 'ned.' }[l], label: { ru: 'СЃСЂРµРґРЅРёР№ СЃСЂРѕРє РёР·РіРѕС‚РѕРІР»РµРЅРёСЏ', en: 'average lead time', sr: 'proseДЌan rok izrade' }[l] },
-          { value: 100, suffix: '%', label: { ru: 'РјР°СЃСЃРёРІ Рё РЅР°С‚СѓСЂР°Р»СЊРЅС‹Рµ С‚РєР°РЅРё', en: 'solid wood and natural fabrics', sr: 'masiv i prirodne tkanine' }[l] },
-          { value: 10, suffix: { ru: 'Р»РµС‚', en: 'yrs', sr: 'god.' }[l], label: { ru: 'РіР°СЂР°РЅС‚РёСЏ РЅР° РєР°СЂРєР°СЃ', en: 'frame warranty', sr: 'garancija na ram' }[l] },
-          { value: 24, suffix: '', label: { ru: 'РјР°СЃС‚РµСЂР° РІ С†РµС…Рµ', en: 'makers in the workshop', sr: 'majstora u radionici' }[l] },
+          { value: 6, suffix: { ru: 'нед.', en: 'wks', sr: 'ned.' }[l], label: { ru: 'средний срок изготовления', en: 'average lead time', sr: 'prosečan rok izrade' }[l] },
+          { value: 100, suffix: '%', label: { ru: 'массив и натуральные ткани', en: 'solid wood and natural fabrics', sr: 'masiv i prirodne tkanine' }[l] },
+          { value: 10, suffix: { ru: 'лет', en: 'yrs', sr: 'god.' }[l], label: { ru: 'гарантия на каркас', en: 'frame warranty', sr: 'garancija na ram' }[l] },
+          { value: 24, suffix: '', label: { ru: 'мастера в цехе', en: 'makers in the workshop', sr: 'majstora u radionici' }[l] },
         ],
-        linkLabel: { ru: 'РљР°Рє РјС‹ СЂР°Р±РѕС‚Р°РµРј', en: 'How we work', sr: 'Kako radimo' }[l],
+        linkLabel: { ru: 'Как мы работаем', en: 'How we work', sr: 'Kako radimo' }[l],
         route: '/about',
       },
       {
         blockType: 'cta',
         variant: 'pistachio',
-        heading: { ru: 'РњРµР±РµР»СЊ РЅР° Р·Р°РєР°Р·', en: 'Made to measure', sr: 'NameЕЎtaj po meri' }[l],
-        text: { ru: 'РЎРІРѕРё СЂР°Р·РјРµСЂС‹, С‚РєР°РЅСЊ Рё РѕС‚РґРµР»РєР°. Р”РёР·Р°Р№РЅРµСЂ СЃРІСЏР¶РµС‚СЃСЏ РІ С‚РµС‡РµРЅРёРµ РґРЅСЏ.', en: 'Your size, fabric and finish. A designer will be in touch within a day.', sr: 'VaЕЎe mere, tkanina i obrada. Dizajner Д‡e vam se javiti u toku dana.' }[l],
-        buttonLabel: { ru: 'РћР±СЃСѓРґРёС‚СЊ РїСЂРѕРµРєС‚', en: 'Discuss a project', sr: 'Razgovarajmo o projektu' }[l],
+        heading: { ru: 'Мебель на заказ', en: 'Made to measure', sr: 'Nameštaj po meri' }[l],
+        text: { ru: 'Свои размеры, ткань и отделка. Дизайнер свяжется в течение дня.', en: 'Your size, fabric and finish. A designer will be in touch within a day.', sr: 'Vaše mere, tkanina i obrada. Dizajner će vam se javiti u toku dana.' }[l],
+        buttonLabel: { ru: 'Обсудить проект', en: 'Discuss a project', sr: 'Razgovarajmo o projektu' }[l],
         action: 'customForm',
         route: '/custom',
       },
       {
         blockType: 'dragCanvas',
-        heading: { ru: 'РРЅС‚РµСЂСЊРµСЂС‹ РєР»РёРµРЅС‚РѕРІ', en: 'Our clientsвЂ™ homes', sr: 'Enterijeri naЕЎih kupaca' }[l],
-        lead: { ru: 'РџРѕС‚СЏРЅРёС‚Рµ РїРѕР»РѕС‚РЅРѕ, С‡С‚РѕР±С‹ РїРѕСЃРјРѕС‚СЂРµС‚СЊ, РєР°Рє РЅР°С€Р° РјРµР±РµР»СЊ Р¶РёРІС‘С‚ РІ РґРѕРјР°С….', en: 'Drag the canvas to see our furniture at home.', sr: 'Prevucite platno i pogledajte kako naЕЎ nameЕЎtaj Еѕivi u domovima.' }[l],
+        heading: { ru: 'Интерьеры клиентов', en: 'Our clients’ homes', sr: 'Enterijeri naših kupaca' }[l],
+        lead: { ru: 'Потяните полотно, чтобы посмотреть, как наша мебель живёт в домах.', en: 'Drag the canvas to see our furniture at home.', sr: 'Prevucite platno i pogledajte kako naš nameštaj živi u domovima.' }[l],
         items: media.interiors.map((image, i) => ({ image, caption: '', review: reviewIds[i] ?? undefined })),
       },
       {
         blockType: 'cta',
         variant: 'plum',
-        heading: { ru: 'Р”Р°РІР°Р№С‚Рµ РѕР±СЃСѓРґРёРј РІР°С€ РёРЅС‚РµСЂСЊРµСЂ', en: 'LetвЂ™s talk about your space', sr: 'Razgovarajmo o vaЕЎem prostoru' }[l],
-        text: { ru: 'РќР°РїРёС€РёС‚Рµ РЅР°Рј вЂ” РїРѕРґР±РµСЂС‘Рј РјРѕРґРµР»Рё, С‚РєР°РЅРё Рё СЃСЂРѕРєРё.', en: 'Drop us a line and weвЂ™ll suggest models, fabrics and timings.', sr: 'PiЕЎite nam i predloЕѕiД‡emo modele, tkanine i rokove.' }[l],
-        buttonLabel: { ru: 'РћС‚РїСЂР°РІРёС‚СЊ', en: 'Send', sr: 'PoЕЎalji' }[l],
+        heading: { ru: 'Давайте обсудим ваш интерьер', en: 'Let’s talk about your space', sr: 'Razgovarajmo o vašem prostoru' }[l],
+        text: { ru: 'Напишите нам — подберём модели, ткани и сроки.', en: 'Drop us a line and we’ll suggest models, fabrics and timings.', sr: 'Pišite nam i predložićemo modele, tkanine i rokove.' }[l],
+        buttonLabel: { ru: 'Отправить', en: 'Send', sr: 'Pošalji' }[l],
         action: 'contactForm',
       },
     ],
     meta: {
-      title: { ru: `${site.name} вЂ” РґРёР·Р°Р№РЅРµСЂСЃРєР°СЏ РјРµР±РµР»СЊ РёР· Р‘РµР»РіСЂР°РґР°`, en: `${site.name} вЂ” designer furniture from Belgrade`, sr: `${site.name} вЂ” dizajnerski nameЕЎtaj iz Beograda` }[l],
+      title: { ru: `${site.name} — дизайнерская мебель из Белграда`, en: `${site.name} — designer furniture from Belgrade`, sr: `${site.name} — dizajnerski nameštaj iz Beograda` }[l],
       description: {
-        ru: 'Р”РёРІР°РЅС‹, СЃС‚РѕР»С‹, СЃС‚СѓР»СЊСЏ, С…СЂР°РЅРµРЅРёРµ Рё РєСЂРѕРІР°С‚Рё РёР· РјР°СЃСЃРёРІР° Рё РЅР°С‚СѓСЂР°Р»СЊРЅС‹С… С‚РєР°РЅРµР№. Р”РµР»Р°РµРј РїРѕ РІР°С€РёРј СЂР°Р·РјРµСЂР°Рј, РґРѕСЃС‚Р°РІР»СЏРµРј РїРѕ РЎРµСЂР±РёРё.',
+        ru: 'Диваны, столы, стулья, хранение и кровати из массива и натуральных тканей. Делаем по вашим размерам, доставляем по Сербии.',
         en: 'Sofas, tables, chairs, storage and beds in solid wood and natural fabrics. Made to measure, delivered across Serbia.',
         sr: 'Sofe, stolovi, stolice, odlaganje i kreveti od masiva i prirodnih tkanina. Po meri, sa dostavom po Srbiji.',
       }[l],
@@ -581,14 +581,14 @@ async function seedCustomer(productIds: Record<string, number>) {
   const found = await payload.find({ collection: 'customers', where: { email: { equals: email } }, limit: 1, overrideAccess: true })
   const data = {
     email,
-    name: 'РСЂРёРЅР° РљРѕРІР°С‡',
+    name: 'Ирина Ковач',
     phone: '+381 64 123 4567',
     locale: 'ru' as const,
     newsletter: true,
     favorites: ['sofa-oblako', 'lamp-luna', 'chair-terasa', 'shelf-lestnica'].map((k) => productIds[k]),
     addresses: [
-      { label: 'Р”РѕРј', city: 'Beograd', postalCode: '11000', street: 'Kneza MiloЕЎa 12', apartment: '7', floor: 3, elevator: true, isDefault: true },
-      { label: 'Р”Р°С‡Р°', city: 'Zemun', postalCode: '11080', street: 'Gospodska 5', floor: 1, elevator: false, isDefault: false },
+      { label: 'Дом', city: 'Beograd', postalCode: '11000', street: 'Kneza Miloša 12', apartment: '7', floor: 3, elevator: true, isDefault: true },
+      { label: 'Дача', city: 'Zemun', postalCode: '11080', street: 'Gospodska 5', floor: 1, elevator: false, isDefault: false },
     ],
   }
   let id = found.docs[0]?.id as number | undefined
@@ -619,7 +619,7 @@ async function seedCustomer(productIds: Record<string, number>) {
           product: p.id,
           title: p.title,
           variantSku: v?.sku,
-          variantLabel: [v?.size, typeof v?.fabric === 'object' ? v?.fabric?.title : null, typeof v?.finish === 'object' ? v?.finish?.title : null].filter(Boolean).join(' В· '),
+          variantLabel: [v?.size, typeof v?.fabric === 'object' ? v?.fabric?.title : null, typeof v?.finish === 'object' ? v?.finish?.title : null].filter(Boolean).join(' · '),
           qty,
           unitPrice: unit,
           lineTotal: unit * qty,
@@ -643,7 +643,7 @@ async function seedCustomer(productIds: Record<string, number>) {
         contact: { name: data.name, phone: data.phone, email },
         items,
         totals: { subtotal, bundleDiscount: 0, promoDiscount: 0, delivery, services: 0, total: subtotal + delivery, currency: 'EUR' },
-        delivery: { method: 'city', city: 'Beograd', postalCode: '11000', street: 'Kneza MiloЕЎa 12', apartment: '7', floor: 3, elevator: true, lift: true, assembly: true },
+        delivery: { method: 'city', city: 'Beograd', postalCode: '11000', street: 'Kneza Miloša 12', apartment: '7', floor: 3, elevator: true, lift: true, assembly: true },
         statusHistory: flow.slice(0, reached + 1).map((s, i) => ({ status: s, at: new Date(created + i * 6 * day).toISOString(), note: '' })),
         locale: 'ru',
         accessToken: crypto.randomBytes(16).toString('hex'),
@@ -653,7 +653,7 @@ async function seedCustomer(productIds: Record<string, number>) {
       context: ctx,
     })
   }
-  payload.logger.info(`seed: РґРµРјРѕ-РїРѕРєСѓРїР°С‚РµР»СЊ ${email} Рё 3 Р·Р°РєР°Р·Р°`)
+  payload.logger.info(`seed: демо-покупатель ${email} и 3 заказа`)
 }
 
 async function seed() {
@@ -662,14 +662,14 @@ async function seed() {
   const t0 = Date.now()
   await seedAdmin()
   const materialIds = await seedMaterials()
-  payload.logger.info('seed: РјР°С‚РµСЂРёР°Р»С‹')
+  payload.logger.info('seed: материалы')
   const designerIds = await seedDesigners()
   const categoryIds = await seedCategories()
-  payload.logger.info('seed: РєР°С‚РµРіРѕСЂРёРё Рё РґРёР·Р°Р№РЅРµСЂС‹')
+  payload.logger.info('seed: категории и дизайнеры')
   const collectionIds = await seedCollections()
-  payload.logger.info('seed: РєРѕР»Р»РµРєС†РёРё')
+  payload.logger.info('seed: коллекции')
   const productIds = await seedProducts({ materials: materialIds, designers: designerIds, categories: categoryIds, collections: collectionIds })
-  payload.logger.info(`seed: С‚РѕРІР°СЂС‹ (${Object.keys(productIds).length})`)
+  payload.logger.info(`seed: товары (${Object.keys(productIds).length})`)
   const reviewIds = await seedReviews(productIds)
   const interiors = await seedInteriors()
   const workshop: number[] = []
@@ -679,20 +679,20 @@ async function seed() {
       await upsertMedia(
         `workshop-${i}`,
         () => interiorImage({ wall: [P.sand, P.milk, P.mist][i], floor: '#BFA27A', items: [picks[i], picks[(i + 1) % 3]].map((p) => ({ type: p.type as FurnitureType, colors: p.colors })), seed: i + 5 }),
-        { ru: 'Р¦РµС… Oblik РІ Р‘РµР»РіСЂР°РґРµ', en: 'The Oblik workshop in Belgrade', sr: 'Oblik radionica u Beogradu' },
+        { ru: 'Цех Oblik в Белграде', en: 'The Oblik workshop in Belgrade', sr: 'Oblik radionica u Beogradu' },
       ),
     )
   }
-  const map = await upsertMedia('showroom-map', () => mapImage(), { ru: 'РљР°СЂС‚Р°: С€РѕСѓСЂСѓРј РІ РЎР°РІР°РјР°Р»Рµ', en: 'Map: showroom in Savamala', sr: 'Mapa: ЕЎou-rum u Savamali' })
+  const map = await upsertMedia('showroom-map', () => mapImage(), { ru: 'Карта: шоурум в Савамале', en: 'Map: showroom in Savamala', sr: 'Mapa: šou-rum u Savamali' })
   await seedPages({ workshop, interiors })
-  payload.logger.info('seed: СЃС‚СЂР°РЅРёС†С‹')
+  payload.logger.info('seed: страницы')
   await seedGlobals({ hero: interiors[0], interiors, map }, reviewIds, categoryIds)
   await seedPromoCodes()
   await seedCustomer(productIds)
-  payload.logger.info(`seed: РіРѕС‚РѕРІРѕ Р·Р° ${Math.round((Date.now() - t0) / 1000)} СЃ`)
+  payload.logger.info(`seed: готово за ${Math.round((Date.now() - t0) / 1000)} с`)
 }
 
-// `payload run` РёРјРїРѕСЂС‚РёСЂСѓРµС‚ РјРѕРґСѓР»СЊ Рё СЃСЂР°Р·Сѓ Р·Р°РІРµСЂС€Р°РµС‚ РїСЂРѕС†РµСЃСЃ, РїРѕСЌС‚РѕРјСѓ Р¶РґС‘Рј С‡РµСЂРµР· top-level await
+// `payload run` импортирует модуль и сразу завершает процесс, поэтому ждём через top-level await
 try {
   await seed()
 } catch (error) {
