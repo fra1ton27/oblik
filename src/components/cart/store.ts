@@ -13,6 +13,8 @@ export type CartSnapshot = {
   slug?: string | null
   collectionTitle?: string | null
   leadTime?: string | null
+  /** был ли товар в наличии при добавлении — для заметки «Теперь только под заказ» */
+  inStock?: boolean
 }
 
 export type CartLine = {

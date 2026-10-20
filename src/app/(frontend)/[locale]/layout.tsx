@@ -12,6 +12,8 @@ import { ClientBoot } from '@/components/layout/ClientBoot'
 import { SmoothScroll } from '@/components/motion/SmoothScroll'
 import { Preloader } from '@/components/motion/Preloader'
 import { CookieConsent } from '@/components/layout/CookieConsent'
+import { MiniCart } from '@/components/cart/MiniCart'
+import { CartSync } from '@/components/cart/CartSync'
 
 type Props = {
   children: React.ReactNode
@@ -65,6 +67,8 @@ export default async function LocaleLayout({ children, params }: Props) {
           <SmoothScroll>
             <PageTransitionProvider>
               {children}
+              <MiniCart />
+              <CartSync />
               <Toaster />
               <CookieConsent />
               <Preloader />

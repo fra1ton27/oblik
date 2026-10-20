@@ -169,7 +169,7 @@ export function CustomOrderForm({ variant = 'full', product, tone = 'paper', onS
           {(p) => <Input {...p} {...register('name')} autoComplete="name" />}
         </Field>
         <Field label={t('phone')} required error={err(errors.phone?.message)}>
-          {(p) => <Controller control={control} name="phone" render={({ field }) => <PhoneInput {...p} name={field.name} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
+          {(p) => <Controller control={control} name="phone" render={({ field }) => <PhoneInput {...p} ref={field.ref} name={field.name} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
         </Field>
         {!short && (
           <>

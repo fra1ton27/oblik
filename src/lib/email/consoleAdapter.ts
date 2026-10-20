@@ -19,12 +19,16 @@ export function consoleEmailAdapter(defaults: {
           ? message.text
           : typeof message.html === 'string'
             ? message.html
+                .replace(/<head[\s\S]*?<\/head>/g, '')
                 .replace(/<style[\s\S]*?<\/style>/g, '')
-                .replace(/<a [^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g, '$2 <$1>')
+                // ссылка в виде «текст: адрес», иначе угловые скобки съест удаление тегов ниже
+                .replace(/<a [^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g, '$2: $1')
                 .replace(/<br\s*\/?>/g, '\n')
+                .replace(/<\/td>/g, ' ')
                 .replace(/<\/(p|h1|h2|h3|tr|li|div)>/g, '\n')
                 .replace(/<[^>]+>/g, '')
                 .replace(/&nbsp;/g, ' ')
+                .replace(/&amp;/g, '&')
                 .replace(/\n{3,}/g, '\n\n')
                 .trim()
             : ''

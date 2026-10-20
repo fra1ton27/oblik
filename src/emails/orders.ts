@@ -70,12 +70,20 @@ export function renderOrderStatus(order: EmailOrder, locale: Locale) {
   return { subject, html: emailLayout({ locale, title: subject, body }) }
 }
 
+const deliveryMethods: Record<string, string> = { city: 'по городу', country: 'по стране', pickup: 'самовывоз из шоурума' }
+
+function deliveryLine(order: EmailOrder) {
+  const d = order.delivery
+  const method = (d?.method && deliveryMethods[d.method]) || '—'
+  return [method, d?.city, d?.street].filter(Boolean).join(', ')
+}
+
 /** Менеджеру — всегда по-русски, со ссылкой на заказ в админке */
 export function renderOrderManager(order: EmailOrder) {
   const subject = `Новый заказ ${order.number} — ${formatMoney(order.totals?.total ?? 0, 'ru', order.totals?.currency ?? site.currency)}`
   const body = [
     paragraph(`${order.contact.name}, ${order.contact.phone}, ${order.contact.email}`),
-    paragraph(`Доставка: ${order.delivery?.method ?? '—'} ${order.delivery?.city ?? ''} ${order.delivery?.street ?? ''}. Язык заказа: ${order.locale ?? 'ru'}.`),
+    paragraph(`Доставка: ${deliveryLine(order)}. Язык заказа: ${order.locale ?? 'ru'}.`),
     itemsTable(order, 'ru'),
     `<p style="margin:24px 0 0">${button(`${site.url}/admin/collections/orders/${order.id}`, 'Открыть в админке')}</p>`,
   ].join('')

@@ -47,7 +47,7 @@ export function ContactForm({ defaultTopic = 'other' }: { defaultTopic?: (typeof
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t('phone')} error={err(errors.phone?.message)} hint={t('emailOrPhoneHint')}>
           {(p) => (
-            <Controller control={control} name="phone" render={({ field }) => <PhoneInput {...p} name={field.name} value={field.value ?? ''} onChange={field.onChange} onBlur={field.onBlur} />} />
+            <Controller control={control} name="phone" render={({ field }) => <PhoneInput {...p} ref={field.ref} name={field.name} value={field.value ?? ''} onChange={field.onChange} onBlur={field.onBlur} />} />
           )}
         </Field>
         <Field label={t('email')} error={err(errors.email?.message)}>

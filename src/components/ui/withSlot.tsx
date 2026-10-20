@@ -16,3 +16,18 @@ export function withSlot(text: string, node: ReactNode): ReactNode {
     </Fragment>
   )
 }
+
+export const SLOTS = ['\u0000', '\u0001', '\u0002'] as const
+
+/** Несколько узлов в одной строке: t('agree', { terms: SLOTS[0], privacy: SLOTS[1] }) */
+export function withSlots(text: string, nodes: ReactNode[]): ReactNode {
+  const parts = text.split(/([\u0000-\u0002])/)
+  return (
+    <Fragment>
+      {parts.map((part, i) => {
+        const idx = SLOTS.indexOf(part as (typeof SLOTS)[number])
+        return <Fragment key={i}>{idx >= 0 ? nodes[idx] : part}</Fragment>
+      })}
+    </Fragment>
+  )
+}

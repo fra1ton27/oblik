@@ -108,6 +108,7 @@ export function NewsletterForm({ tone = 'dark' }: { tone?: 'dark' | 'light' }) {
               checked={!!field.value}
               onChange={(e) => field.onChange(e.target.checked)}
               onBlur={field.onBlur}
+              ref={field.ref}
               name={field.name}
               error={fieldState.error?.message ? tv(fieldState.error.message) : undefined}
             />

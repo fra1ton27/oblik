@@ -19,6 +19,7 @@ type Props = {
   id?: string
   name?: string
   disabled?: boolean
+  ref?: React.Ref<HTMLInputElement>
   'aria-invalid'?: boolean
   'aria-describedby'?: string
   'aria-required'?: boolean
@@ -36,7 +37,7 @@ function flag(code: string) {
  * Телефон с выбором страны (по умолчанию RS). Значение — международный формат «+381 64 123 4567»,
  * проверка в zod-схеме через libphonenumber-js.
  */
-export function PhoneInput({ value = '', onChange, onBlur, defaultCountry = 'RS', id, name, disabled, ...aria }: Props) {
+export function PhoneInput({ value = '', onChange, onBlur, defaultCountry = 'RS', id, name, disabled, ref, ...aria }: Props) {
   const t = useTranslations('forms')
   const locale = useLocale() as Locale
   const parsed = value ? parsePhoneNumberFromString(value) : undefined
@@ -89,6 +90,7 @@ export function PhoneInput({ value = '', onChange, onBlur, defaultCountry = 'RS'
         </span>
       </label>
       <input
+        ref={ref}
         id={id}
         name={name}
         type="tel"

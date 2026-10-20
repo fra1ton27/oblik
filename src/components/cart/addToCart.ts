@@ -10,6 +10,7 @@ type Options = {
   price?: number
   image?: string | null
   leadTime?: string | null
+  inStock?: boolean
   /** не открывать мини-корзину (например, при добавлении комплекта по частям) */
   silent?: boolean
 }
@@ -29,6 +30,7 @@ export function addCardToCart(card: ProductCard, opts: Options = {}) {
       slug: card.slug,
       collectionTitle: card.collection?.title ?? null,
       leadTime: opts.leadTime ?? null,
+      inStock: opts.inStock ?? card.availability === 'in_stock',
     },
   })
   if (!opts.silent) useCart.getState().openMiniCart()
