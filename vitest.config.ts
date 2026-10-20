@@ -4,8 +4,8 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      '@messages': path.resolve(__dirname, 'messages'),
+      '@': path.resolve(import.meta.dirname, 'src'),
+      '@messages': path.resolve(import.meta.dirname, 'messages'),
     },
   },
   test: {

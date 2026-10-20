@@ -7,6 +7,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { htmlLang, routing } from '@/i18n/routing'
 import { site } from '@/config/site'
 import { fontVariables } from '../fonts'
+import { PageTransitionProvider } from '@/components/motion/PageTransition'
+import { Toaster } from '@/components/ui/Toast'
+import { ClientBoot } from '@/components/layout/ClientBoot'
 
 type Props = {
   children: React.ReactNode
@@ -54,7 +57,13 @@ export default async function LocaleLayout({ children, params }: Props) {
         <Script id="js-ready" strategy="beforeInteractive">
           {jsReadyScript}
         </Script>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <PageTransitionProvider>
+            {children}
+            <Toaster />
+            <ClientBoot />
+          </PageTransitionProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )
