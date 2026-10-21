@@ -105,13 +105,13 @@ async function upsertLocalized(
   if (opts.createOnly) {
     const [field, condition] = Object.entries(where)[0] as [string, { equals: unknown }]
     const existing = (await knownIds(collection, field)).get(String(condition.equals))
-    if (existing) return existing
+    const check = localizedField(collection, build('sr'))
+    if (existing && !(check && (await incompleteIds(collection, check)).has(existing))) return existing
   }
   const found = await payload.find({ collection, where: where as never, locale: 'ru', limit: 1, depth: 0, overrideAccess: true })
   let id: number
   if (found.docs[0]) {
     id = found.docs[0].id as number
-    if (opts.createOnly) return id
     const saved = await payload.findByID({ collection, id, locale: 'ru', depth: 0, overrideAccess: true })
     await payload.update({ collection, id, locale: 'ru', data: withIds(build('ru'), saved) as never, depth: 0, overrideAccess: true, context: ctx })
   } else {
@@ -126,6 +126,29 @@ async function upsertLocalized(
 }
 
 const mediaCache = new Map<string, number>()
+
+/**
+ * createOnly: записи без последней локали (sr). Так бывает, если вызов оборвался между созданием
+ * на ru и переводами — такие записи не пропускаем, а дописываем. Один запрос на коллекцию.
+ */
+const incomplete = new Map<string, Set<number>>()
+
+async function incompleteIds(collection: 'categories' | 'materials' | 'collections' | 'products' | 'pages' | 'designers' | 'media' | 'reviews', field: string) {
+  let ids = incomplete.get(collection)
+  if (!ids) {
+    const res = await payload.find({ collection, locale: 'sr', fallbackLocale: false, pagination: false, depth: 0, overrideAccess: true, select: { [field]: true } as never })
+    const docs = res.docs as unknown as Array<Record<string, unknown> & { id: number }>
+    ids = new Set(docs.filter((doc) => doc[field] == null || doc[field] === '').map((doc) => doc.id))
+    incomplete.set(collection, ids)
+  }
+  return ids
+}
+
+/** Первое локализованное поле из данных сида — по нему видно, дошёл ли перевод до sr */
+function localizedField(collection: 'categories' | 'materials' | 'collections' | 'products' | 'pages' | 'designers', data: Record<string, unknown>) {
+  const fields = payload.collections[collection].config.flattenedFields
+  return Object.keys(data).find((key) => fields.some((f) => f.name === key && 'localized' in f && f.localized))
+}
 
 /**
  * Ключ seed → id медиа, одним запросом. Ключ хранится в поле seedKey; у картинок, созданных до него,
@@ -151,7 +174,7 @@ async function upsertMedia(key: string, make: () => Promise<Buffer>, alt: T3, to
   checkpoint()
   const index = await knownMedia()
   let id = index.get(key)
-  if (id && opts.createOnly) {
+  if (id && opts.createOnly && !(await incompleteIds('media', 'alt')).has(id)) {
     mediaCache.set(key, id)
     return id
   }
@@ -385,7 +408,7 @@ async function seedReviews(productIds: Record<string, number>) {
       : []
     checkpoint()
     const known = existing?.get(`${r.author}|${product}`)
-    if (known) {
+    if (known && !(await incompleteIds('reviews', 'text')).has(known)) {
       ids.push(known)
       continue
     }
@@ -475,7 +498,8 @@ async function seedPages(media: { workshop: number[]; interiors: number[] }) {
     }
     const content = (l: Locale) => (page.content ? richText(page.content[l] as RichBlock[]) : undefined)
     checkpoint()
-    if (opts.createOnly && (await knownIds('pages', 'key')).has(page.key)) continue
+    const done = opts.createOnly ? (await knownIds('pages', 'key')).get(page.key) : undefined
+    if (done && !(await incompleteIds('pages', 'title')).has(done)) continue
     const found = await payload.find({ collection: 'pages', where: { key: { equals: page.key } }, limit: 1, overrideAccess: true })
     let id = found.docs[0]?.id as number | undefined
     const heroImage = { about: media.workshop[0], custom: media.interiors[1], contact: media.interiors[2] }[page.key as 'about' | 'custom' | 'contact']
@@ -787,6 +811,7 @@ export async function runSeed(instance: Payload, options: SeedOptions = {}): Pro
   opts = options
   mediaCache.clear()
   known.clear()
+  incomplete.clear()
   const t0 = Date.now()
   try {
     await seedSteps()
