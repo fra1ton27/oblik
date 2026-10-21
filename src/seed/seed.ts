@@ -350,6 +350,11 @@ async function seedProducts(refs: { materials: Record<string, number>; designers
   }
   // состав коллекций
   for (const c of collections) {
+    checkpoint()
+    if (opts.createOnly) {
+      const current = await payload.findByID({ collection: 'collections', id: refs.collections[c.key], depth: 0, overrideAccess: true, select: { products: true } })
+      if ((current.products?.length ?? 0) === c.products.length) continue
+    }
     await payload.update({
       collection: 'collections',
       id: refs.collections[c.key],
@@ -484,6 +489,14 @@ async function seedPages(media: { workshop: number[]; interiors: number[] }) {
 }
 
 async function updateGlobalLocalized(slug: 'header' | 'footer' | 'homepage' | 'siteSettings', build: (l: Locale) => Record<string, unknown>) {
+  checkpoint()
+  // createOnly: глобал уже заполнен, если первое поле есть в последней локали (ru → en → sr)
+  if (opts.createOnly) {
+    const [first] = Object.keys(build('ru'))
+    const current = (await payload.findGlobal({ slug, locale: 'sr', fallbackLocale: false, depth: 0, overrideAccess: true })) as unknown as Record<string, unknown>
+    const value = current[first]
+    if (Array.isArray(value) ? value.length > 0 : Boolean(value)) return
+  }
   await payload.updateGlobal({ slug, locale: 'ru', data: build('ru') as never, overrideAccess: true, context: ctx })
   for (const l of OTHER) {
     const saved = await payload.findGlobal({ slug, locale: 'ru', depth: 0, overrideAccess: true })
