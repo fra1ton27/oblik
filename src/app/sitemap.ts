@@ -1,7 +1,9 @@
 import type { MetadataRoute } from 'next'
+import { connection } from 'next/server'
 import { locales, routing, type Locale, type Pathname } from '@/i18n/routing'
 import { absoluteUrl, localizedPath } from '@/lib/paths'
 import { getAllProductSlugs, getLocalizedSlugs } from '@/lib/data/catalog'
+import { prerenderAtBuild } from '@/lib/build'
 
 // индексируемые статические страницы (раздел 6 ТЗ); корзина, кабинет, оформление и страницы успеха — нет
 const STATIC: Array<{ route: Pathname; priority: number; changeFrequency: 'daily' | 'weekly' | 'monthly' | 'yearly' }> = [
@@ -34,6 +36,8 @@ const slugParams = (slug: Partial<Record<Locale, string>>, key: string) =>
 export const revalidate = 3600
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // сборка без БД (Docker): карта сайта становится динамической, данные всё равно берутся из кэша по тегам
+  if (!prerenderAtBuild) await connection()
   const [products, categories, collections] = await Promise.all([getAllProductSlugs(), getLocalizedSlugs('categories'), getLocalizedSlugs('collections')])
   return [
     ...STATIC.flatMap((s) => entries(s.route, null, { changeFrequency: s.changeFrequency, priority: s.priority })),

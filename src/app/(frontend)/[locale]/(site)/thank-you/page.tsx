@@ -11,6 +11,9 @@ import { buttonClasses } from '@/components/ui/Button'
 import { CollectionCard } from '@/components/catalog/CollectionCard'
 import { ThankYouHero } from '@/components/forms/ThankYouHero'
 
+// Динамическая страница: номер заявки из query. Явно, чтобы сборка без БД (src/lib/build.ts) не сочла её статической
+export const dynamic = 'force-dynamic'
+
 type Props = { params: Promise<{ locale: Locale }>; searchParams: Promise<{ type?: string; ref?: string }> }
 
 const TYPES = ['contact', 'custom', 'question'] as const

@@ -108,6 +108,10 @@ export default buildConfig({
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URL || '' },
     migrationDir: path.resolve(dirname, 'migrations'),
+    // dev синхронизирует схему push'ем; production — только миграциями, отдельным шагом до старта
+    // приложения (`pnpm payload migrate`, в Docker — сервис migrate). Не prodMigrations: тогда `pnpm start`
+    // на dev-базе после push'а спрашивал бы подтверждение и завершал процесс.
+    // После изменения коллекций: pnpm payload migrate:create <name> и коммит src/migrations.
   }),
   email: emailAdapter(),
   sharp,

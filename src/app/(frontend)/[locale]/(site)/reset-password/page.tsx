@@ -6,6 +6,9 @@ import { pageMetadata } from '@/lib/seo'
 import { AuthShell } from '@/components/account/AuthShell'
 import { ForgotForm, NewPasswordForm } from '@/components/account/ResetForms'
 
+// Динамическая страница: токен сброса из query. Явно, чтобы сборка без БД (src/lib/build.ts) не сочла её статической
+export const dynamic = 'force-dynamic'
+
 type Props = { params: Promise<{ locale: Locale }>; searchParams: Promise<{ token?: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

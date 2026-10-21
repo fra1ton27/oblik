@@ -729,7 +729,7 @@ async function seed() {
 /**
  * Seed пишет в базу мимо Next, поэтому сбросить теги unstable_cache он не может, а кэш данных
  * Next хранит на диске и переживает перезапуск. Удаляем его, чтобы страницы перечитали базу.
- * TODO(spec): на проде после seed нужен перезапуск приложения (будет в README, этап 12).
+ * В Docker seed работает в отдельном контейнере: после него приложение пересоздаётся (README, «Деплой»).
  */
 function dropDataCache() {
   for (const dir of ['.next/dev/cache/fetch-cache', '.next/cache/fetch-cache']) {

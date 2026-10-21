@@ -15,6 +15,8 @@ pnpm lint && pnpm typecheck && pnpm test && pnpm i18n:check   # перед ка�
 pnpm test:e2e          # Playwright, нужен запущенный dev/start
 pnpm generate:types    # после изменения коллекций Payload
 pnpm generate:importmap
+pnpm payload migrate:create <name>   # после изменения схемы; prod применяет только миграции из src/migrations
+docker compose -f docker-compose.prod.yml up -d --build   # прод: postgres → migrate → app, подробно в README.md
 ```
 
 ## Правила кода

@@ -14,6 +14,7 @@ import { Preloader } from '@/components/motion/Preloader'
 import { CookieConsent } from '@/components/layout/CookieConsent'
 import { MiniCart } from '@/components/cart/MiniCart'
 import { CartSync } from '@/components/cart/CartSync'
+import { prerenderAtBuild } from '@/lib/build'
 
 type Props = {
   children: React.ReactNode
@@ -21,7 +22,8 @@ type Props = {
 }
 
 export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }))
+  // сборка без БД (Docker): пустой список — страницы соберутся по первому запросу и попадут в ISR-кэш
+  return prerenderAtBuild ? routing.locales.map((locale) => ({ locale })) : []
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

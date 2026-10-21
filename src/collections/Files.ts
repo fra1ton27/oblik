@@ -22,7 +22,8 @@ export const Files: CollectionConfig = {
     delete: isAdmin,
   },
   upload: {
-    staticDir: path.resolve(dirname, '../../private-files'),
+    // в Docker — том (см. docker-compose.prod.yml)
+    staticDir: process.env.FILES_DIR || path.resolve(dirname, '../../private-files'),
     mimeTypes: ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'application/pdf'],
     disableLocalStorage: false,
   },

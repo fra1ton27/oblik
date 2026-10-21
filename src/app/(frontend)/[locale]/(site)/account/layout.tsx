@@ -3,6 +3,9 @@ import { isLocale, routing } from '@/i18n/routing'
 import { getCustomerDoc, requireCustomer } from '@/lib/data/account'
 import { AccountNav } from '@/components/account/AccountNav'
 
+// Динамический раздел: сессия покупателя из cookie. Явно, чтобы сборка без БД (src/lib/build.ts) не сочла его статическим
+export const dynamic = 'force-dynamic'
+
 type Props = { children: React.ReactNode; params: Promise<{ locale: string }> }
 
 /**

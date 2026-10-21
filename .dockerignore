@@ -1,0 +1,38 @@
+# Контекст сборки Docker: только исходники. Секреты, данные и артефакты остаются на хосте.
+.git
+.github
+.claude
+.vscode
+.idea
+
+node_modules
+.pnpm-store
+.next
+out
+build
+*.tsbuildinfo
+next-env.d.ts
+
+# env: значения передаются в контейнеры через docker compose, в образ не попадают
+.env
+.env.*
+!.env.example
+
+# локальные данные: база, медиа и файлы заявок живут в томах
+.data
+media
+private-files
+
+# тесты и отчёты
+tests
+test-results
+playwright-report
+playwright/.cache
+coverage
+
+docs
+Dockerfile
+.dockerignore
+docker-compose*.yml
+*.log
+.DS_Store

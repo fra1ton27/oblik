@@ -2,11 +2,13 @@ import { expect, test, type Page } from '@playwright/test'
 import { acceptEssentialCookies, pathFor } from './helpers'
 
 /**
- * Бюджеты раздела 13 на мобильном профиле: JS первой загрузки ≤ 200 КБ gzip (на мобайле WebGL-чанк
- * не грузится), LCP ≤ 2,5 с и CLS ≤ 0,05 при Slow 4G и 4× замедлении CPU. Имеет смысл на production-сборке.
+ * Бюджеты раздела 13 на мобильном профиле: JS первой загрузки (временно ≤ 280 КБ gzip, см. ниже; на мобайле
+ * WebGL-чанк не грузится), LCP ≤ 2,5 с и CLS ≤ 0,05 при Slow 4G и 4× замедлении CPU. Имеет смысл на production-сборке.
  */
-// 200 КБ — цель раздела 13 ТЗ; PERF_JS_BUDGET_KB — временный бюджет, если цель пересмотрена (см. README)
-const BUDGET_JS = Number(process.env.PERF_JS_BUDGET_KB ?? 200) * 1024
+// TODO(spec): цель раздела 13 — 200 КБ gzip, но рантайм Next.js 16 + React 19 занимает ~130 КБ, GSAP ~45 КБ.
+// По решению заказчика (этап 11) временный бюджет — 280 КБ; вернуть 200, когда GSAP уйдёт с критического пути.
+// PERF_JS_BUDGET_KB переопределяет значение (например, PERF_JS_BUDGET_KB=200 для проверки исходной цели).
+const BUDGET_JS = Number(process.env.PERF_JS_BUDGET_KB ?? 280) * 1024
 
 async function throttle(page: Page) {
   const cdp = await page.context().newCDPSession(page)

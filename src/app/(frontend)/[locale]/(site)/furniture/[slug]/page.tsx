@@ -17,10 +17,12 @@ import { LocaleAlternates } from '@/components/layout/alternates'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { ProductHero } from '@/components/product/ProductHero'
 import { RenderBlocks, type AnyBlock } from '@/blocks/RenderBlocks'
+import { prerenderAtBuild } from '@/lib/build'
 
 type Props = { params: Promise<{ locale: Locale; slug: string }> }
 
 export async function generateStaticParams() {
+  if (!prerenderAtBuild) return []
   try {
     const all = await getAllProductSlugs()
     return all.flatMap((p) => locales.filter((l) => p.slug[l]).map((l) => ({ locale: l, slug: p.slug[l]! })))

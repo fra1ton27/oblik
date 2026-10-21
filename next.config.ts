@@ -46,8 +46,15 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  // шрифты OG-картинок читаются с диска (src/lib/og.tsx) — в standalone их нужно взять явно
-  outputFileTracingIncludes: { '/**/opengraph-image*': ['./assets/og/**'] },
+  // шрифты OG-картинок читаются с диска (src/lib/og.tsx) — в standalone их нужно взять явно;
+  // нативные части sharp (libvips) трассировщик не видит; в Docker это Linux-сборки, локально — Windows
+  outputFileTracingIncludes: {
+    '/**/opengraph-image*': ['./assets/og/**'],
+    '/[locale]/og': ['./assets/og/**'],
+    '*': ['./node_modules/.pnpm/@img+sharp-*/**/*'],
+  },
+  // загрузки (медиатека и закрытые файлы заявок) живут в томах, а не в образе
+  outputFileTracingExcludes: { '*': ['./media/**', './private-files/**'] },
   reactStrictMode: true,
   poweredByHeader: false,
   images: {

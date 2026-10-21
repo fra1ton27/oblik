@@ -10,6 +10,9 @@ import { SplitHeading } from '@/components/motion/SplitHeading'
 import { CartView } from '@/components/cart/CartView'
 import { CART_HINT_COOKIE } from '@/config/cookies'
 
+// Динамическая страница: корзина: cookie-подсказка о пустой корзине (раздел 12.3 ТЗ). Явно, чтобы сборка без БД (src/lib/build.ts) не сочла её статической
+export const dynamic = 'force-dynamic'
+
 type Props = { params: Promise<{ locale: Locale }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

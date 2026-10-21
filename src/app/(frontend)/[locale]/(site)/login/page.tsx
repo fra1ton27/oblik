@@ -9,6 +9,9 @@ import { pageMetadata } from '@/lib/seo'
 import { AuthNotice, AuthShell } from '@/components/account/AuthShell'
 import { LoginForm } from '@/components/account/LoginForm'
 
+// Динамическая страница: returnTo из query и проверка сессии. Явно, чтобы сборка без БД (src/lib/build.ts) не сочла её статической
+export const dynamic = 'force-dynamic'
+
 type Props = { params: Promise<{ locale: Locale }>; searchParams: Promise<{ returnTo?: string; verify?: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

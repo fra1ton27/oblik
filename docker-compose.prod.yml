@@ -1,0 +1,116 @@
+# Продакшен (раздел 12.6 ТЗ): PostgreSQL + миграции + приложение, медиа и файлы заявок в томах.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build                      # postgres → migrate → app
+#   docker compose -f docker-compose.prod.yml run --rm seed                       # демо-данные (по желанию)
+#   docker compose -f docker-compose.prod.yml --profile https up -d               # + Caddy с HTTPS
+#
+# Значения берутся из .env рядом с этим файлом (шаблон и описание — .env.example). Подробно — README.md.
+name: oblik
+
+x-db-url: &db-url postgres://${POSTGRES_USER:-oblik}:${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в .env}@postgres:5432/${POSTGRES_DB:-oblik}
+
+x-build: &build
+  context: .
+  args:
+    NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?задайте NEXT_PUBLIC_SITE_URL в .env}
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+    NEXT_PUBLIC_ANALYTICS_SRC: ${NEXT_PUBLIC_ANALYTICS_SRC:-}
+    NEXT_PUBLIC_ANALYTICS_ID: ${NEXT_PUBLIC_ANALYTICS_ID:-}
+
+# environment перекрывает env_file: адрес базы и каталоги загрузок в контейнерах всегда эти
+x-runtime-env: &runtime-env
+  DATABASE_URL: *db-url
+  PAYLOAD_SECRET: ${PAYLOAD_SECRET:?задайте PAYLOAD_SECRET в .env}
+  MEDIA_DIR: /data/media
+  FILES_DIR: /data/private-files
+
+x-uploads: &uploads
+  - media:/data/media
+  - private-files:/data/private-files
+
+# Образ с исходниками и всеми зависимостями: миграции и seed
+x-tools: &tools
+  build:
+    <<: *build
+    target: tools
+  image: oblik-tools
+  env_file: .env
+  environment: *runtime-env
+  volumes: *uploads
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-oblik}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в .env}
+      POSTGRES_DB: ${POSTGRES_DB:-oblik}
+      POSTGRES_INITDB_ARGS: --encoding=UTF8
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Миграции Payload до старта приложения; app ждёт успешного завершения
+  migrate:
+    <<: *tools
+    command: ['pnpm', 'payload', 'migrate']
+    restart: 'no'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Демо-данные: docker compose -f docker-compose.prod.yml run --rm seed
+  seed:
+    <<: *tools
+    profiles: ['seed']
+    command: ['pnpm', 'seed']
+    restart: 'no'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  app:
+    build:
+      <<: *build
+      target: runner
+    image: oblik-app
+    restart: unless-stopped
+    env_file: .env
+    environment: *runtime-env
+    # Наружу — только через обратный прокси (Caddy ниже или свой nginx). APP_BIND=0.0.0.0 — открыть порт напрямую.
+    ports:
+      - '${APP_BIND:-127.0.0.1}:${APP_PORT:-3000}:3000'
+    volumes: *uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # HTTPS с автоматическим сертификатом Let's Encrypt для домена из NEXT_PUBLIC_SITE_URL
+  caddy:
+    image: caddy:2-alpine
+    profiles: ['https']
+    restart: unless-stopped
+    command: ['caddy', 'reverse-proxy', '--from', '${NEXT_PUBLIC_SITE_URL}', '--to', 'app:3000']
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  media:
+  private-files:
+  caddy-data:
+  caddy-config:

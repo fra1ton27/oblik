@@ -22,7 +22,8 @@ export const Media: CollectionConfig = {
     delete: isContentEditor,
   },
   upload: {
-    staticDir: path.resolve(dirname, '../../media'),
+    // в Docker — том (см. docker-compose.prod.yml)
+    staticDir: process.env.MEDIA_DIR || path.resolve(dirname, '../../media'),
     mimeTypes: ['image/*', 'video/mp4', 'video/webm'],
     focalPoint: true,
     crop: true,
