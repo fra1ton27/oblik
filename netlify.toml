@@ -1,0 +1,8 @@
+# Деплой на Netlify (README, «Деплой на Netlify»): Next.js через адаптер Netlify, база — Neon,
+# загрузки — Netlify Blobs. Переменные (DATABASE_URL, PAYLOAD_SECRET и др.) задаются в интерфейсе Netlify.
+[build]
+  command = "pnpm netlify:build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"

@@ -1,7 +1,9 @@
 import 'server-only'
+import { UPLOAD_LIMITS } from '@/config/uploads'
 
-export const MAX_FILES = 5
-export const MAX_FILE_SIZE = 10 * 1024 * 1024
+export const MAX_FILES = UPLOAD_LIMITS.maxFiles
+export const MAX_FILE_SIZE = UPLOAD_LIMITS.maxFileSize
+export const MAX_TOTAL_SIZE = UPLOAD_LIMITS.maxTotalSize
 
 export type DetectedType = 'image/jpeg' | 'image/png' | 'image/heic' | 'application/pdf'
 

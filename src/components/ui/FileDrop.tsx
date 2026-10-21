@@ -5,10 +5,12 @@ import { useId, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useFormat } from '@/components/motion/useFormat'
 import { cn } from '@/lib/cn'
+import { UPLOAD_LIMITS } from '@/config/uploads'
 
 export const FILE_LIMITS = {
-  maxFiles: 5,
-  maxSize: 10 * 1024 * 1024,
+  maxFiles: UPLOAD_LIMITS.maxFiles,
+  maxSize: UPLOAD_LIMITS.maxFileSize,
+  maxTotal: UPLOAD_LIMITS.maxTotalSize,
   accept: ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'application/pdf'],
   extensions: ['.jpg', '.jpeg', '.png', '.heic', '.heif', '.pdf'],
 }
@@ -22,7 +24,7 @@ type Props = {
   'aria-describedby'?: string
 }
 
-/** Загрузка файлов перетаскиванием или выбором: до 5 шт., до 10 МБ, jpg/png/heic/pdf */
+/** Загрузка файлов перетаскиванием или выбором: лимиты из config/uploads.ts, jpg/png/heic/pdf */
 export function FileDrop({ files, onChange, error, id: idProp, disabled, ...aria }: Props) {
   const t = useTranslations('forms')
   const f = useFormat()
@@ -43,12 +45,22 @@ export function FileDrop({ files, onChange, error, id: idProp, disabled, ...aria
         continue
       }
       if (file.size > FILE_LIMITS.maxSize) {
-        reason = t('fileSizeError', { name: file.name })
+        reason = t('fileSizeError', { name: file.name, size: UPLOAD_LIMITS.maxFileMb })
         continue
       }
       ok.push(file)
     }
-    const next = [...files, ...ok]
+    // общий лимит на все вложения (на Netlify он строже, чем «по файлу»): лишние файлы не добавляем
+    let total = files.reduce((sum, file) => sum + file.size, 0)
+    const next = [...files]
+    for (const file of ok) {
+      if (total + file.size > FILE_LIMITS.maxTotal) {
+        reason = t('fileTotalError', { total: UPLOAD_LIMITS.maxTotalMb })
+        continue
+      }
+      total += file.size
+      next.push(file)
+    }
     if (next.length > FILE_LIMITS.maxFiles) reason = t('fileCountError', { max: FILE_LIMITS.maxFiles })
     setRejected(reason)
     onChange(next.slice(0, FILE_LIMITS.maxFiles))
@@ -86,7 +98,9 @@ export function FileDrop({ files, onChange, error, id: idProp, disabled, ...aria
             {t('fileDropChoose')}
           </label>
         </p>
-        <p className="text-[13px] text-ink-soft">{t('fileDropHint', { max: FILE_LIMITS.maxFiles })}</p>
+        <p className="text-[13px] text-ink-soft">{UPLOAD_LIMITS.totalIsTighter
+            ? t('fileDropHintTotal', { max: FILE_LIMITS.maxFiles, total: UPLOAD_LIMITS.maxTotalMb })
+            : t('fileDropHint', { max: FILE_LIMITS.maxFiles, size: UPLOAD_LIMITS.maxFileMb })}</p>
         <input
           ref={inputRef}
           id={id}

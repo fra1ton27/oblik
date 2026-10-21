@@ -17,6 +17,7 @@ pnpm generate:types    # после изменения коллекций Payloa
 pnpm generate:importmap
 pnpm payload migrate:create <name>   # после изменения схемы; prod применяет только миграции из src/migrations
 docker compose -f docker-compose.prod.yml up -d --build   # прод: postgres → migrate → app, подробно в README.md
+# Netlify: netlify.toml → pnpm netlify:build (миграции + сборка), загрузки в Netlify Blobs, README.md
 ```
 
 ## Правила кода

@@ -11,6 +11,8 @@ const withNextIntl = createNextIntlPlugin({
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })
 
 const isDev = process.env.NODE_ENV !== 'production'
+// Netlify выставляет NETLIFY=true при сборке (README, «Деплой на Netlify»)
+const onNetlify = process.env.NETLIFY === 'true'
 const turnstile = 'https://challenges.cloudflare.com'
 
 // CSP: Next.js и админка Payload используют инлайн-скрипты гидрации, поэтому 'unsafe-inline'.
@@ -45,7 +47,15 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // standalone — для Docker; на Netlify сборку раскладывает его адаптер Next.js
+  output: onNetlify ? undefined : 'standalone',
+  // Вшиваются при сборке: функции Netlify не видят переменные из netlify.toml во время работы
+  env: {
+    // загрузки Payload в Netlify Blobs (src/lib/storage/netlifyBlobs.ts)
+    OBLIK_STORAGE: onNetlify ? 'netlify-blobs' : (process.env.OBLIK_STORAGE ?? ''),
+    // тело запроса к функции Netlify — до 6 МБ, поэтому вложения заявки там до 4 МБ вместе (src/config/uploads.ts)
+    NEXT_PUBLIC_UPLOAD_TOTAL_MB: process.env.NEXT_PUBLIC_UPLOAD_TOTAL_MB || (onNetlify ? '4' : '50'),
+  },
   // шрифты OG-картинок читаются с диска (src/lib/og.tsx) — в standalone их нужно взять явно;
   // нативные части sharp (libvips) трассировщик не видит; в Docker это Linux-сборки, локально — Windows
   outputFileTracingIncludes: {

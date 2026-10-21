@@ -32,9 +32,14 @@ import { globals } from './globals'
 import { consoleEmailAdapter } from './lib/email/consoleAdapter'
 import { ensureSequences } from './lib/sequences'
 import { isContentEditor } from './lib/access'
+import { netlifyBlobsStorage } from './lib/storage/netlifyBlobs'
+import { demoSeedEndpoint } from './seed/endpoint'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+// На Netlify (next.config.ts выставляет при сборке) загрузки живут в Netlify Blobs: у функций нет постоянного диска
+const onNetlify = process.env.OBLIK_STORAGE === 'netlify-blobs'
 
 function parseFrom(value: string | undefined) {
   const match = /^(.*)<(.+)>$/.exec(value ?? '')
@@ -72,7 +77,12 @@ export default buildConfig({
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: ` — ${site.name} admin` },
+    components: {
+      // демо-данные из админки, когда нет командной строки (Netlify); видна при ALLOW_DEMO_SEED=1
+      beforeDashboard: ['/admin/DemoSeed#DemoSeed'],
+    },
   },
+  endpoints: [demoSeedEndpoint],
   i18n: {
     supportedLanguages: { ru, en },
     fallbackLanguage: 'ru',
@@ -124,6 +134,14 @@ export default buildConfig({
     await ensureSequences(payload)
   },
   plugins: [
+    // включён только на Netlify, но поля prefix/_objectKey добавляет всегда — схема одна для всех окружений
+    netlifyBlobsStorage({
+      enabled: onNetlify,
+      collections: {
+        ...(process.env.S3_BUCKET ? {} : { media: { store: 'media', cacheControl: 'public, max-age=86400' } }),
+        files: { store: 'private-files', cacheControl: 'private, no-store' },
+      },
+    }),
     seoPlugin({
       collections: ['products', 'collections', 'categories', 'pages'],
       uploadsCollection: 'media',

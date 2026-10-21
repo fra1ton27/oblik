@@ -347,6 +347,8 @@ export interface Media {
    * Background while loading
    */
   tone?: ('sand' | 'lavender' | 'pistachio' | 'blush' | 'mist') | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1042,6 +1044,8 @@ export interface Inquiry {
 export interface File {
   id: number;
   owner?: (number | null) | Customer;
+  prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -2017,6 +2021,8 @@ export interface PagesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   tone?: T;
+  prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2079,6 +2085,8 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface FilesSelect<T extends boolean = true> {
   owner?: T;
+  prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

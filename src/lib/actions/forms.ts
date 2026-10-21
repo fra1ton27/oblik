@@ -6,7 +6,7 @@ import { contactSchema, customSchema, questionSchema, type ContactInput, type Qu
 import { saveInquiry } from '@/lib/inquiries'
 import { getSessionCustomer } from '@/lib/auth'
 import { getPayloadClient } from '@/lib/payload'
-import { detectMime, MAX_FILE_SIZE, MAX_FILES, safeFileName } from '@/lib/files'
+import { detectMime, MAX_FILE_SIZE, MAX_FILES, MAX_TOTAL_SIZE, safeFileName } from '@/lib/files'
 import { isLocale, type Locale } from '@/i18n/routing'
 import { fieldErrorsFrom, type ActionResult } from './result'
 
@@ -77,6 +77,7 @@ export async function submitCustom(formData: FormData): Promise<ActionResult<{ n
 
   const files = formData.getAll('files').filter((f): f is File => typeof f === 'object' && 'arrayBuffer' in f && f.size > 0)
   if (files.length > MAX_FILES) return { ok: false, fieldErrors: { files: 'files' } }
+  if (files.reduce((sum, file) => sum + file.size, 0) > MAX_TOTAL_SIZE) return { ok: false, fieldErrors: { files: 'files' } }
   const buffers: Array<{ name: string; mime: string; data: Buffer }> = []
   for (const file of files) {
     if (file.size > MAX_FILE_SIZE) return { ok: false, fieldErrors: { files: 'files' } }

@@ -26,15 +26,18 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "db:dev": "tsx scripts/db-dev.ts",
     "format": "prettier --write .",
-    "db:reset": "tsx scripts/db-reset.ts"
+    "db:reset": "tsx scripts/db-reset.ts",
+    "netlify:build": "tsx scripts/netlify-build.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^6.0.0",
+    "@netlify/blobs": "11.1.5",
     "@payloadcms/db-postgres": "3.91.0",
     "@payloadcms/email-nodemailer": "3.91.0",
     "@payloadcms/email-resend": "3.91.0",
     "@payloadcms/next": "3.91.0",
+    "@payloadcms/plugin-cloud-storage": "3.91.0",
     "@payloadcms/plugin-redirects": "3.91.0",
     "@payloadcms/plugin-seo": "3.91.0",
     "@payloadcms/richtext-lexical": "3.91.0",
