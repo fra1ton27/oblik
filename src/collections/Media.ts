@@ -54,5 +54,13 @@ export const Media: CollectionConfig = {
         value,
       })),
     },
+    {
+      // ключ записи демо-данных: по нему seed находит свои картинки. По имени файла нельзя — при совпадении
+      // имён Payload меняет хвостовой номер (interior-1 → interior-2), и имя указывает на чужой ключ
+      name: 'seedKey',
+      type: 'text',
+      index: true,
+      admin: { hidden: true },
+    },
   ],
 }

@@ -23,7 +23,8 @@ const TEXT = {
   },
 }
 
-const MAX_STEPS = 30
+// на Netlify шаг — 15 с, а картинки там собираются медленно: полный seed занимает десятки шагов
+const MAX_STEPS = 150
 
 type State = { status: 'idle' | 'running' | 'done' | 'error'; step: number; detail?: string }
 

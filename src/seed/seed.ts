@@ -46,6 +46,24 @@ function checkpoint() {
   if (opts.deadline && Date.now() > opts.deadline) throw new SeedPaused()
 }
 
+/**
+ * createOnly: уже созданные записи — одним запросом на коллекцию. Иначе каждый повторный вызов
+ * перебирал бы их по одной, и на медленной сети к базе (Netlify → Neon) время уходило бы только на это.
+ */
+const known = new Map<string, Map<string, number>>()
+
+async function knownIds(collection: 'categories' | 'materials' | 'collections' | 'products' | 'pages' | 'designers', field: string) {
+  const cacheKey = `${collection}.${field}`
+  let index = known.get(cacheKey)
+  if (!index) {
+    const res = await payload.find({ collection, locale: 'ru', pagination: false, depth: 0, overrideAccess: true, select: { [field]: true } as never })
+    const docs = res.docs as unknown as Array<Record<string, unknown> & { id: number }>
+    index = new Map(docs.map((doc) => [String(doc[field]), doc.id]))
+    known.set(cacheKey, index)
+  }
+  return index
+}
+
 // ───────── утилиты ─────────
 
 /** Проверка: сербские строки только латиницей */
@@ -84,6 +102,11 @@ async function upsertLocalized(
   build: (locale: Locale) => Record<string, unknown>,
 ): Promise<number> {
   checkpoint()
+  if (opts.createOnly) {
+    const [field, condition] = Object.entries(where)[0] as [string, { equals: unknown }]
+    const existing = (await knownIds(collection, field)).get(String(condition.equals))
+    if (existing) return existing
+  }
   const found = await payload.find({ collection, where: where as never, locale: 'ru', limit: 1, depth: 0, overrideAccess: true })
   let id: number
   if (found.docs[0]) {
@@ -104,17 +127,30 @@ async function upsertLocalized(
 
 const mediaCache = new Map<string, number>()
 
+/**
+ * Ключ seed → id медиа, одним запросом. Ключ хранится в поле seedKey; у картинок, созданных до него,
+ * ищем точное имя файла key.webp / key.jpg / key.png.
+ */
+async function knownMedia() {
+  let index = known.get('media')
+  if (!index) {
+    const res = await payload.find({ collection: 'media', pagination: false, depth: 0, overrideAccess: true, select: { filename: true, seedKey: true }, sort: 'id' })
+    index = new Map()
+    for (const doc of res.docs) if (doc.seedKey && !index.has(doc.seedKey)) index.set(doc.seedKey, doc.id as number)
+    for (const doc of res.docs) {
+      const base = String(doc.filename ?? '').replace(/\.(webp|jpe?g|png)$/i, '')
+      if (!doc.seedKey && base && !index.has(base)) index.set(base, doc.id as number)
+    }
+    known.set('media', index)
+  }
+  return index
+}
+
 async function upsertMedia(key: string, make: () => Promise<Buffer>, alt: T3, tone = 'sand', ext: 'jpg' | 'png' = 'jpg'): Promise<number> {
   if (mediaCache.has(key)) return mediaCache.get(key)!
   checkpoint()
-  const found = await payload.find({
-    collection: 'media',
-    where: { filename: { in: [`${key}.webp`, `${key}.${ext}`] } },
-    limit: 1,
-    depth: 0,
-    overrideAccess: true,
-  })
-  let id = found.docs[0]?.id as number | undefined
+  const index = await knownMedia()
+  let id = index.get(key)
   if (id && opts.createOnly) {
     mediaCache.set(key, id)
     return id
@@ -124,12 +160,13 @@ async function upsertMedia(key: string, make: () => Promise<Buffer>, alt: T3, to
     const doc = await payload.create({
       collection: 'media',
       locale: 'ru',
-      data: { alt: alt.ru, tone: tone as never },
+      data: { alt: alt.ru, tone: tone as never, seedKey: key },
       file: { data, mimetype: ext === 'png' ? 'image/png' : 'image/jpeg', name: `${key}.${ext}`, size: data.length },
       overrideAccess: true,
       context: ctx,
     })
     id = doc.id as number
+    index.set(key, id)
   }
   for (const locale of LOCALES) {
     await payload.update({ collection: 'media', id, locale, data: { alt: alt[locale] }, depth: 0, overrideAccess: true, context: ctx })
@@ -326,6 +363,9 @@ async function seedProducts(refs: { materials: Record<string, number>; designers
 
 async function seedReviews(productIds: Record<string, number>) {
   const ids: number[] = []
+  const existing = opts.createOnly
+    ? new Map((await payload.find({ collection: 'reviews', pagination: false, depth: 0, overrideAccess: true, select: { author: true, product: true } })).docs.map((d) => [`${d.author}|${typeof d.product === 'object' ? d.product?.id : d.product}`, d.id as number]))
+    : null
   for (const [i, r] of reviews.entries()) {
     const product = productIds[r.product]
     const p = products.find((x) => x.key === r.product)!
@@ -339,12 +379,13 @@ async function seedReviews(productIds: Record<string, number>) {
         ]
       : []
     checkpoint()
-    const found = await payload.find({ collection: 'reviews', where: { and: [{ author: { equals: r.author } }, { product: { equals: product } }] }, limit: 1, overrideAccess: true })
-    let id = found.docs[0]?.id as number | undefined
-    if (id && opts.createOnly) {
-      ids.push(id)
+    const known = existing?.get(`${r.author}|${product}`)
+    if (known) {
+      ids.push(known)
       continue
     }
+    const found = await payload.find({ collection: 'reviews', where: { and: [{ author: { equals: r.author } }, { product: { equals: product } }] }, limit: 1, overrideAccess: true })
+    let id = found.docs[0]?.id as number | undefined
     const base = { product, author: r.author, rating: r.rating, photos, approved: true }
     if (!id) id = (await payload.create({ collection: 'reviews', locale: 'ru', data: { ...base, city: r.city.ru, text: r.text.ru }, overrideAccess: true, context: ctx })).id as number
     for (const l of LOCALES) await payload.update({ collection: 'reviews', id, locale: l, data: { ...base, city: r.city[l], text: r.text[l] }, overrideAccess: true, context: ctx })
@@ -429,9 +470,9 @@ async function seedPages(media: { workshop: number[]; interiors: number[] }) {
     }
     const content = (l: Locale) => (page.content ? richText(page.content[l] as RichBlock[]) : undefined)
     checkpoint()
+    if (opts.createOnly && (await knownIds('pages', 'key')).has(page.key)) continue
     const found = await payload.find({ collection: 'pages', where: { key: { equals: page.key } }, limit: 1, overrideAccess: true })
     let id = found.docs[0]?.id as number | undefined
-    if (id && opts.createOnly) continue
     const heroImage = { about: media.workshop[0], custom: media.interiors[1], contact: media.interiors[2] }[page.key as 'about' | 'custom' | 'contact']
     const build = (l: Locale) => ({ key: page.key, title: page.title[l], intro: page.intro[l], heroImage, content: content(l), layout: layout(l), needsLegalReview: Boolean(page.legal) })
     if (!id) id = (await payload.create({ collection: 'pages', locale: 'ru', data: build('ru') as never, overrideAccess: true, context: ctx })).id as number
@@ -732,6 +773,7 @@ export async function runSeed(instance: Payload, options: SeedOptions = {}): Pro
   payload = instance
   opts = options
   mediaCache.clear()
+  known.clear()
   const t0 = Date.now()
   try {
     await seedSteps()
