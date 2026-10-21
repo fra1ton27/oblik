@@ -280,7 +280,8 @@ async function seedProducts(refs: { materials: Record<string, number>; designers
       featured: Boolean(p.featured),
       popularity: p.popularity,
       status: 'published',
-      meta: { title: `${p.title[l]} — ${site.name}`, description: p.short[l], image: images[0] },
+      // OG-картинку по умолчанию рисует opengraph-image.tsx (подиум, цена); своё фото редактор задаёт вручную
+      meta: { title: `${p.title[l]} — ${site.name}`, description: p.short[l], image: null },
       faq: [],
     }))
   }
@@ -475,6 +476,7 @@ async function seedGlobals(media: { hero: number; interiors: number[]; map: numb
       { days: { ru: 'Сб', en: 'Sat', sr: 'Sub' }[l], time: '11:00–17:00' },
       { days: { ru: 'Вс', en: 'Sun', sr: 'Ned' }[l], time: { ru: 'выходной', en: 'closed', sr: 'zatvoreno' }[l] },
     ],
+    openingHoursSpec: 'Mo-Fr 10:00-19:00, Sa 11:00-17:00',
     mapLat: site.contacts.showroom.lat,
     mapLng: site.contacts.showroom.lng,
     mapImage: media.map,

@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import { getHomepage } from '@/lib/data/globals'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
+import { OrganizationJsonLd } from '@/components/seo/OrganizationJsonLd'
 import { pageMetadata } from '@/lib/seo'
 import { site } from '@/config/site'
 
@@ -25,5 +26,10 @@ export default async function HomePage({ params }: Props) {
   const { locale } = await params
   setRequestLocale(locale)
   const home = await getHomepage(locale)
-  return <RenderBlocks blocks={home.layout} context={{ locale, page: 'home' }} />
+  return (
+    <>
+      <OrganizationJsonLd locale={locale} />
+      <RenderBlocks blocks={home.layout} context={{ locale, page: 'home' }} />
+    </>
+  )
 }

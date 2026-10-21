@@ -5,6 +5,7 @@ import { useSession } from '@/components/account/sessionStore'
 import { useWishlist } from '@/components/account/wishlistStore'
 import { mergeCart, saveCart } from '@/lib/actions/cart'
 import { mergeFavorites } from '@/lib/actions/account'
+import { CART_HINT_COOKIE } from '@/config/cookies'
 import { useCart, type CartLine } from './store'
 
 /**
@@ -39,6 +40,12 @@ export function CartSync() {
       .then((ids) => ids && useWishlist.getState().replaceAll(ids))
       .catch(() => {})
   }, [customer, status])
+
+  // кука-подсказка с числом позиций: страница корзины по ней рисует пустое состояние на сервере
+  useEffect(() => {
+    const count = lines.reduce((n, l) => n + l.qty, 0)
+    document.cookie = `${CART_HINT_COOKIE}=${count}; path=/; max-age=${60 * 60 * 24 * 90}; samesite=lax`
+  }, [lines])
 
   // изменения корзины → сервер (с задержкой)
   useEffect(() => {

@@ -13,7 +13,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { buttonClasses } from '@/components/ui/Button'
 import { TiltCard } from '@/components/motion/TiltCard'
 import { Terrace } from '@/components/shapes'
-import { CustomOrderForm } from '@/components/forms/CustomOrderForm'
+import { LazyCustomOrderForm } from '@/components/forms/LazyForms'
 import { contentPageMetadata } from '@/components/layout/LegalPage'
 
 type Props = { params: Promise<{ locale: Locale }> }
@@ -59,7 +59,7 @@ export default async function CustomPage({ params }: Props) {
           </div>
           <div className="min-w-0 lg:col-span-7 lg:col-start-6">
             <TiltCard tilt={-2} mobileTilt={0} className="rounded-card bg-paper p-5 shadow-float sm:p-8">
-              <CustomOrderForm />
+              <LazyCustomOrderForm />
             </TiltCard>
           </div>
         </div>

@@ -25,3 +25,18 @@ describe('routing', () => {
     }
   })
 })
+
+describe('шаблон маршрута для переключателя языка', () => {
+  it('подставляет параметры обратно в шаблон', async () => {
+    const { routeTemplate } = await import('@/i18n/template')
+    expect(routeTemplate('/furniture/vaza-stupen', { locale: 'ru', slug: 'vaza-stupen' })).toBe('/furniture/[slug]')
+    expect(routeTemplate('/catalog/divany', { locale: 'ru', category: 'divany' })).toBe('/catalog/[category]')
+    expect(routeTemplate('/account/orders/OB-2026-000001', { locale: 'en', number: 'OB-2026-000001' })).toBe('/account/orders/[number]')
+  })
+
+  it('готовый шаблон и неизвестный путь не трогает', async () => {
+    const { routeTemplate } = await import('@/i18n/template')
+    expect(routeTemplate('/furniture/[slug]', { slug: 'x' })).toBe('/furniture/[slug]')
+    expect(routeTemplate('/net-takoy', { locale: 'ru' })).toBe('/net-takoy')
+  })
+})

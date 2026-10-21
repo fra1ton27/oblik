@@ -244,7 +244,8 @@
     "questionSubmit": "Ask a question",
     "select": "Choose",
     "networkError": "Couldn’t send — no connection. Your details are saved.",
-    "choose": "Choose"
+    "choose": "Choose",
+    "noscript": "To send the form, please enable JavaScript — or email us:"
   },
   "uiKit": {
     "title": "UI kit",
@@ -417,7 +418,7 @@
     "wishlistAdded": "Added to your wishlist",
     "wishlistRemoved": "Removed from your wishlist",
     "quickAdd": "Add to basket",
-    "quickAddLabel": "Add “{title}” to basket",
+    "quickAddLabel": "Add to basket: “{title}”",
     "added": "“{title}” is in your basket",
     "moreSwatches": "{count} more",
     "swatchesLabel": "Finish options",

@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import { parseFilters } from '@/lib/catalog'
 import { pageMetadata } from '@/lib/seo'
-import { getCategoryBySlug, getSlugsById } from '@/lib/data/catalog'
+import { findSlugInOtherLocales, getCategoryBySlug, getSlugsById } from '@/lib/data/catalog'
 import { findRedirect } from '@/lib/data/redirects'
 import { localizedPath } from '@/lib/paths'
 import { CatalogScreen } from '@/components/catalog/CatalogScreen'
@@ -20,6 +20,8 @@ async function load(locale: Locale, slug: string) {
   if (!category) {
     const to = await findRedirect(localizedPath('/catalog/[category]', { category: slug }, locale))
     if (to) permanentRedirect(to)
+    const other = await findSlugInOtherLocales('categories', decodeURIComponent(slug), locale)
+    if (other) permanentRedirect(localizedPath('/catalog/[category]', { category: other }, locale))
     notFound()
   }
   const slugs = await getSlugsById('categories', category.id)

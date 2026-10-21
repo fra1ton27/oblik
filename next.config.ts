@@ -3,7 +3,11 @@ import { withPayload } from '@payloadcms/next/withPayload'
 import createNextIntlPlugin from 'next-intl/plugin'
 import bundleAnalyzer from '@next/bundle-analyzer'
 
-const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
+// precompile: ICU-сообщения компилируются при сборке — парсер не попадает в клиентский бандл (бюджет JS, раздел 13)
+const withNextIntl = createNextIntlPlugin({
+  requestConfig: './src/i18n/request.ts',
+  experimental: { messages: { path: './messages', format: 'json', locales: 'infer', precompile: true } },
+})
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })
 
 const isDev = process.env.NODE_ENV !== 'production'
@@ -42,6 +46,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // шрифты OG-картинок читаются с диска (src/lib/og.tsx) — в standalone их нужно взять явно
+  outputFileTracingIncludes: { '/**/opengraph-image*': ['./assets/og/**'] },
   reactStrictMode: true,
   poweredByHeader: false,
   images: {

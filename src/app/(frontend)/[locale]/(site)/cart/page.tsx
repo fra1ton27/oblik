@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import { getCatalogIndex } from '@/lib/data/catalog'
@@ -7,6 +8,7 @@ import { pageMetadata } from '@/lib/seo'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { SplitHeading } from '@/components/motion/SplitHeading'
 import { CartView } from '@/components/cart/CartView'
+import { CART_HINT_COOKIE } from '@/config/cookies'
 
 type Props = { params: Promise<{ locale: Locale }> }
 
@@ -24,6 +26,8 @@ export default async function CartPage({ params }: Props) {
   const tn = await getTranslations('nav')
   const [index, contacts] = await Promise.all([getCatalogIndex(locale), getContacts(locale)])
   const popular = [...index].sort((a, b) => b.popularity - a.popularity).slice(0, 8)
+  // корзина живёт в браузере; кука-подсказка говорит, пуста ли она, — пустое состояние рисуем сразу
+  const assumeEmpty = !(Number((await cookies()).get(CART_HINT_COOKIE)?.value) > 0)
   return (
     <div className="container-site pt-6 pb-8 md:pt-10">
       <Breadcrumbs items={[{ label: tn('home'), href: '/' }, { label: t('title') }]} />
@@ -33,6 +37,7 @@ export default async function CartPage({ params }: Props) {
       <CartView
         popular={popular}
         suggestions={index}
+        assumeEmpty={assumeEmpty}
         displayCurrency={contacts.displayCurrency && contacts.displayCurrency !== contacts.currency ? { code: contacts.displayCurrency, rate: contacts.displayRate } : null}
       />
     </div>

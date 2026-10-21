@@ -1,8 +1,10 @@
 import { Cormorant_Garamond, Manrope, Unbounded } from 'next/font/google'
 
-// latin-ext обязателен: в нём сербские č, ć, đ, š, ž
+// subsets у next/font — это то, что предзагружается: только latin, чтобы шесть файлов (~255 КБ)
+// не отнимали канал у CSS и первой отрисовки. Кириллица и latin-ext (сербские č, ć, đ, š, ž) остаются
+// в @font-face с unicode-range и грузятся, когда на странице есть их символы.
 export const unbounded = Unbounded({
-  subsets: ['latin', 'latin-ext', 'cyrillic'],
+  subsets: ['latin'],
   weight: 'variable',
   display: 'swap',
   variable: '--font-unbounded',
@@ -11,7 +13,7 @@ export const unbounded = Unbounded({
 })
 
 export const manrope = Manrope({
-  subsets: ['latin', 'latin-ext', 'cyrillic'],
+  subsets: ['latin'],
   weight: 'variable',
   display: 'swap',
   variable: '--font-manrope',

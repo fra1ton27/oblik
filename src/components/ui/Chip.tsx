@@ -48,12 +48,16 @@ type ChipProps = Omit<React.ComponentProps<'button'>, 'onToggle'> & {
   removeLabel?: string
 }
 
-/** Интерактивный чип: фильтры, быстрые варианты. selected → aria-pressed */
+// у этих ролей своё состояние (aria-checked / aria-selected) — aria-pressed на них запрещён
+const ROLES_WITH_STATE = new Set(['radio', 'checkbox', 'switch', 'option', 'menuitemradio', 'menuitemcheckbox', 'tab'])
+
+/** Интерактивный чип: фильтры, быстрые варианты. selected → aria-pressed (если роль не задаёт своё состояние) */
 export function Chip({ selected, count, removable, removeLabel, children, className, disabled, ...rest }: ChipProps) {
+  const ownState = typeof rest.role === 'string' && ROLES_WITH_STATE.has(rest.role)
   return (
     <button
       type="button"
-      aria-pressed={removable ? undefined : selected}
+      aria-pressed={removable || ownState ? undefined : selected}
       aria-label={removable && removeLabel ? removeLabel : undefined}
       disabled={disabled}
       className={cn(

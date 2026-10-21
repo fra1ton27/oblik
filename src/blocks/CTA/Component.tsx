@@ -8,8 +8,7 @@ import { SplitHeading } from '@/components/motion/SplitHeading'
 import { StepReveal } from '@/components/motion/StepReveal'
 import { Terrace } from '@/components/shapes'
 import { buttonClasses } from '@/components/ui/Button'
-import { ContactForm } from '@/components/forms/ContactForm'
-import { CustomOrderForm } from '@/components/forms/CustomOrderForm'
+import { LazyContactForm, LazyCustomOrderForm } from '@/components/forms/LazyForms'
 import { CustomOrderModalButton } from '@/components/forms/CustomOrderModal'
 import { TiltCard } from '@/components/motion/TiltCard'
 import { DisplayHeading } from '@/components/ui/DisplayHeading'
@@ -46,7 +45,7 @@ export async function CTABlockView({ block, context }: { block: CTABlock; contex
               </div>
               <div className="lg:col-span-6">
                 <TiltCard tilt={-3} className="rounded-[24px] bg-paper p-5 text-ink shadow-float md:p-8">
-                  <ContactForm />
+                  <LazyContactForm />
                 </TiltCard>
               </div>
             </div>
@@ -85,7 +84,7 @@ export async function CTABlockView({ block, context }: { block: CTABlock; contex
           {block.action === 'customForm' && (
             <div className="lg:col-span-6 lg:col-start-7">
               <TiltCard tilt={2} className="rounded-[24px] bg-paper p-5 shadow-float md:p-8">
-                <CustomOrderForm variant="short" product={product} />
+                <LazyCustomOrderForm variant="short" product={product} />
               </TiltCard>
             </div>
           )}

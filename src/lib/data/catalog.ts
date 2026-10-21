@@ -202,3 +202,44 @@ export const getDesigners = (locale: Locale) =>
     ['designers', locale],
     { tags: [tags.designers] },
   )()
+
+/** Локализованные слаги категорий или коллекций — для sitemap */
+export const getLocalizedSlugs = (collection: 'categories' | 'collections') =>
+  unstable_cache(
+    async (): Promise<Array<{ id: number; slug: Partial<Record<Locale, string>>; updatedAt: string }>> => {
+      const payload = await getPayloadClient()
+      const res = await payload.find({
+        collection,
+        // у коллекций есть статус: черновики в sitemap не попадают
+        ...(collection === 'collections' ? { where: { status: { equals: 'published' } } } : {}),
+        locale: 'all',
+        depth: 0,
+        limit: 1000,
+        pagination: false,
+        select: { slug: true, updatedAt: true } as never,
+      })
+      return (res.docs as unknown as Array<{ id: number; slug: Partial<Record<Locale, string>>; updatedAt: string }>).map((d) => ({ id: d.id, slug: d.slug ?? {}, updatedAt: d.updatedAt }))
+    },
+    ['localized-slugs', collection],
+    { tags: catalogTags },
+  )()
+
+/**
+ * Слаг из другого языка (ссылка переключателя до гидратации, чужая ссылка из мессенджера):
+ * ищем запись по слагу в остальных локалях и возвращаем её слаг на нужном языке.
+ */
+export const findSlugInOtherLocales = (collection: 'products' | 'categories' | 'collections', slug: string, target: Locale) =>
+  unstable_cache(
+    async (): Promise<string | null> => {
+      const payload = await getPayloadClient()
+      for (const l of ['ru', 'en', 'sr'] as const) {
+        if (l === target) continue
+        const res = await payload.find({ collection, where: { slug: { equals: slug } }, locale: l, depth: 0, limit: 1, select: { slug: true } as never })
+        const doc = res.docs[0] as { id: number } | undefined
+        if (doc) return (await getSlugsById(collection, doc.id))[target] ?? null
+      }
+      return null
+    },
+    ['slug-other-locale', collection, slug, target],
+    { tags: catalogTags },
+  )()

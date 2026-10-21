@@ -3,7 +3,7 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { locales, type Locale } from '@/i18n/routing'
 import type { Designer } from '@/payload-types'
-import { getAllProductSlugs, getProductBySlug, getSlugsById } from '@/lib/data/catalog'
+import { findSlugInOtherLocales, getAllProductSlugs, getProductBySlug, getSlugsById } from '@/lib/data/catalog'
 import { getReviews } from '@/lib/data/globals'
 import { findRedirect } from '@/lib/data/redirects'
 import { toCard, toVariantDTOs } from '@/lib/product'
@@ -36,6 +36,8 @@ async function load(locale: Locale, raw: string) {
   if (!product) {
     const to = await findRedirect(localizedPath('/furniture/[slug]', { slug }, locale))
     if (to) permanentRedirect(to)
+    const other = await findSlugInOtherLocales('products', slug, locale)
+    if (other) permanentRedirect(localizedPath('/furniture/[slug]', { slug: other }, locale))
     notFound()
   }
   const slugs = await getSlugsById('products', product.id)
@@ -49,11 +51,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'product' })
   const { product, slugs } = await load(locale, slug)
   const card = toCard(product)
-  const image = toImage(product.meta?.image ?? product.images?.[0]?.image, 'hero', product.title)
+  // своя OG-картинка — только если редактор задал её в SEO-полях; иначе работает opengraph-image.tsx (подиум, цена)
+  const image = product.meta?.image ? toImage(product.meta.image, 'hero', product.title) : null
   const description =
     product.meta?.description ||
     t('metaFallback', { title: product.title, description: product.shortDescription ?? '', price: formatMoney(card.price, locale) }).slice(0, 160)
   return pageMetadata({
+    defaultImage: false,
     locale,
     route: '/furniture/[slug]',
     params: paramsBySlugs(slugs),

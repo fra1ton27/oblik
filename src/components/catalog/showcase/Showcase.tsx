@@ -304,11 +304,14 @@ export function Showcase({ heading, lead, items, quotes, allowPin = true, headin
                 </div>
                 <dl className="border-t border-line">
                   {current.facts.slice(0, 5).map((f, i) => (
-                    <div key={f.label} className={cn('overflow-hidden border-b border-line', i > 2 && 'hidden md:block')}>
-                      <div data-line className="flex justify-between gap-4 py-2 text-[14px]">
-                        <dt className="text-ink-soft">{f.label}</dt>
-                        <dd className="text-right font-semibold">{f.value}</dd>
-                      </div>
+                    // dt и dd — прямые дети div внутри dl (иначе axe: dlitem); маска на div, анимируются сами dt/dd
+                    <div key={f.label} className={cn('flex justify-between gap-4 overflow-hidden border-b border-line py-2 text-[14px]', i > 2 && 'hidden md:flex')}>
+                      <dt data-line className="text-ink-soft">
+                        {f.label}
+                      </dt>
+                      <dd data-line className="text-right font-semibold">
+                        {f.value}
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -367,8 +370,10 @@ export function Showcase({ heading, lead, items, quotes, allowPin = true, headin
                     role="group"
                     aria-roledescription="slide"
                     aria-label={t('position', { current: i + 1, total: n, title: item.title })}
-                    className="absolute top-1/2 left-1/2 w-[min(62vw,300px)] -translate-x-1/2 -translate-y-1/2 md:w-[min(26vw,380px)]"
-                    style={{ transformStyle: 'preserve-3d' }}
+                    // до раскладки GSAP виден только первый подиум и он сверху: иначе его перекрывают остальные
+                    // и LCP витрины откладывается до гидратации (inline-стили GSAP потом перекрывают класс)
+                    className={cn('absolute top-1/2 left-1/2 w-[min(62vw,300px)] -translate-x-1/2 -translate-y-1/2 md:w-[min(26vw,380px)]', i > 0 && 'js:opacity-0')}
+                    style={{ transformStyle: 'preserve-3d', zIndex: i === 0 ? 100 : undefined }}
                     onClick={(e) => openItem(i, e.currentTarget)}
                     onPointerEnter={() => isActive && setHovering(true)}
                     onPointerLeave={() => setHovering(false)}
@@ -386,6 +391,8 @@ export function Showcase({ heading, lead, items, quotes, allowPin = true, headin
                                 width={item.image.width}
                                 height={item.image.height}
                                 sizes="(min-width: 768px) 26vw, 62vw"
+                                // первый подиум — LCP витрины: грузим сразу и с высоким приоритетом
+                                priority={i === 0}
                                 draggable={false}
                                 className="pointer-events-none mx-auto h-auto w-full object-contain"
                               />

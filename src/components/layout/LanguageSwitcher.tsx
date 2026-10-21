@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useTransition } from 'react'
 import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { localeLabels, routing, type Locale } from '@/i18n/routing'
+import { routeTemplate } from '@/i18n/template'
 import { SegmentedPill } from '@/components/ui/SegmentedPill'
 import { useAlternatesStore } from './alternates'
 import { cn } from '@/lib/cn'
@@ -19,8 +20,9 @@ type Props = {
 export function LanguageSwitcher({ className, tone = 'light', size = 'sm' }: Props) {
   const t = useTranslations('common')
   const locale = useLocale() as Locale
-  const pathname = usePathname()
   const currentParams = useParams() as Record<string, string | string[]>
+  // одинаковый шаблон маршрута на сервере (статическая сборка) и клиенте
+  const pathname = routeTemplate(usePathname(), currentParams)
   const alternates = useAlternatesStore((s) => s.params)
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -61,7 +63,8 @@ export function LanguageSwitcher({ className, tone = 'light', size = 'sm' }: Pro
               hrefLang={l}
               lang={l === 'sr' ? 'sr-Latn' : l}
               aria-current={l === locale ? 'true' : undefined}
-              aria-label={localeLabels[l].name}
+              // имя «RU Русский»: видимая метка входит в доступное имя (WCAG 2.5.3, axe label-content-name-mismatch)
+              aria-label={`${localeLabels[l].short} ${localeLabels[l].name}`}
               onClick={(e) => go(e, l)}
               prefetch={false}
             >

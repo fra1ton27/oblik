@@ -11,7 +11,7 @@ import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { PageHero } from '@/blocks/Hero/PageHero'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { TiltCard } from '@/components/motion/TiltCard'
-import { ContactForm } from '@/components/forms/ContactForm'
+import { LazyContactForm } from '@/components/forms/LazyForms'
 import { MapFacade } from '@/components/layout/MapFacade'
 import { contentPageMetadata } from '@/components/layout/LegalPage'
 
@@ -96,7 +96,7 @@ export default async function ContactPage({ params }: Props) {
           <TiltCard tilt={2} mobileTilt={0} className="rounded-card bg-paper p-5 shadow-float sm:p-8">
             <h2 className="t-h3 mb-2">{t('writeUs')}</h2>
             <p className="t-small mb-6 font-normal text-ink-soft">{t('writeUsLead', { time: contacts.responseTime || t('defaultResponseTime') })}</p>
-            <ContactForm />
+            <LazyContactForm />
           </TiltCard>
         </div>
       </section>

@@ -65,9 +65,9 @@ export default async function AboutPage({ params }: Props) {
       )}
 
       <section className="container-site mt-section">
-        <div className="flex flex-col items-start gap-6 rounded-section bg-mist px-5 py-10 md:flex-row md:items-center md:justify-between md:px-12 md:py-14">
+        <div className="flex flex-col items-start gap-6 rounded-section bg-mist px-5 py-10 md:px-12 md:py-14 lg:flex-row lg:items-center lg:justify-between">
           <h2 className="t-h2 max-w-[18ch]">{t('aboutCta')}</h2>
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
             <TransitionLink href="/custom" className={buttonClasses({ fullWidth: true, className: 'sm:w-auto' })}>
               {t('aboutCtaCustom')}
             </TransitionLink>

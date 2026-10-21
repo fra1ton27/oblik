@@ -14,13 +14,15 @@ type Args = {
   image?: { url: string; width?: number; height?: number; alt?: string } | null
   /** query для canonical не используется (фильтры), кроме ?page=N */
   page?: number
+  /** false — у маршрута свой opengraph-image (товар, коллекция): общую картинку /{locale}/og не подставляем */
+  defaultImage?: boolean
 }
 
 /**
  * Metadata API для каждой страницы и локали: title по шаблону «{страница} — Oblik», description,
  * canonical, alternates.languages с hreflang ru, en, sr и x-default, OG и robots.
  */
-export function pageMetadata({ locale, route, params, title, description, noindex, image, page }: Args): Metadata {
+export function pageMetadata({ locale, route, params, title, description, noindex, image, page, defaultImage = true }: Args): Metadata {
   const pathFor = (l: Locale) => {
     const p = params?.[l] ?? params?.[locale] ?? {}
     const base = localizedPath(route, p, l)
@@ -42,7 +44,12 @@ export function pageMetadata({ locale, route, params, title, description, noinde
       url: absoluteUrl(pathFor(locale)),
       title: typeof title === 'string' ? title : undefined,
       description,
-      ...(image ? { images: [{ url: image.url, width: image.width, height: image.height, alt: image.alt }] } : {}),
+      // openGraph страницы целиком заменяет родительский, поэтому картинку указываем явно
+      ...(image
+        ? { images: [{ url: image.url, width: image.width, height: image.height, alt: image.alt }] }
+        : defaultImage
+          ? { images: [{ url: absoluteUrl(`/${locale}/og`), width: 1200, height: 630, alt: site.name }] }
+          : {}),
     },
     twitter: { card: 'summary_large_image' },
   }

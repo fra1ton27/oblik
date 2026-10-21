@@ -1,7 +1,8 @@
 'use client'
 
 import { Fragment, useLayoutEffect, useRef, type ReactNode } from 'react'
-import { Flip, gsap, motion, prefersReducedMotion } from '@/components/motion/gsap'
+import type { Flip } from 'gsap/Flip'
+import { getFlip, gsap, loadFlip, motion, prefersReducedMotion } from '@/components/motion/gsap'
 import { cn } from '@/lib/cn'
 
 export type SegmentItemProps = {
@@ -50,8 +51,11 @@ export function SegmentedPill({ items, activeKey, tone = 'light', size = 'sm', c
   const prevKey = useRef<string | null>(activeKey)
 
   // Запоминаем положение плашки прямо перед сменой (pointerdown/keydown), чтобы Flip знал, откуда ехать
+  // Flip грузится лениво — заранее, при наведении или фокусе; не успел — плашка встанет без анимации
   function capture() {
-    if (indicatorRef.current) stateRef.current = Flip.getState(indicatorRef.current)
+    const F = getFlip()
+    if (F && indicatorRef.current) stateRef.current = F.getState(indicatorRef.current)
+    else void loadFlip()
   }
 
   useLayoutEffect(() => {
@@ -64,10 +68,11 @@ export function SegmentedPill({ items, activeKey, tone = 'light', size = 'sm', c
       return
     }
     const changed = prevKey.current !== activeKey
-    const state = changed ? (stateRef.current ?? Flip.getState(indicator)) : null
+    const F = getFlip()
+    const state = changed && F ? (stateRef.current ?? F.getState(indicator)) : null
     place(indicator, active)
-    if (state && !prefersReducedMotion() && indicator.dataset.placed === 'true') {
-      Flip.from(state, { duration: motion.base, ease: motion.ease.move, scale: true })
+    if (F && state && !prefersReducedMotion() && indicator.dataset.placed === 'true') {
+      F.from(state, { duration: motion.base, ease: motion.ease.move, scale: true })
     }
     indicator.dataset.placed = 'true'
     stateRef.current = null
@@ -99,6 +104,8 @@ export function SegmentedPill({ items, activeKey, tone = 'light', size = 'sm', c
   return (
     <div
       ref={rootRef}
+      onPointerEnter={() => void loadFlip()}
+      onFocusCapture={() => void loadFlip()}
       onPointerDownCapture={capture}
       onKeyDownCapture={capture}
       className={cn(

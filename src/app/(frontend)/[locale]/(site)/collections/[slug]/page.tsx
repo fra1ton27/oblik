@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
-import { getCollectionBySlug, getSlugsById } from '@/lib/data/catalog'
+import { findSlugInOtherLocales, getCollectionBySlug, getSlugsById } from '@/lib/data/catalog'
 import { findRedirect } from '@/lib/data/redirects'
 import { absoluteUrl, localizedPath } from '@/lib/paths'
 import { pageMetadata } from '@/lib/seo'
@@ -24,6 +24,8 @@ async function load(locale: Locale, raw: string) {
   if (!collection) {
     const to = await findRedirect(localizedPath('/collections/[slug]', { slug }, locale))
     if (to) permanentRedirect(to)
+    const other = await findSlugInOtherLocales('collections', slug, locale)
+    if (other) permanentRedirect(localizedPath('/collections/[slug]', { slug: other }, locale))
     notFound()
   }
   const slugs = await getSlugsById('collections', collection.id)
@@ -36,6 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params
   const { collection, slugs } = await load(locale, slug)
   return pageMetadata({
+    defaultImage: false,
     locale,
     route: '/collections/[slug]',
     params: byLocale(slugs),

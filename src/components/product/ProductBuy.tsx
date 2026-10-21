@@ -16,8 +16,7 @@ import { TransitionLink } from '@/components/motion/TransitionLink'
 import { WishlistButton } from '@/components/catalog/WishlistButton'
 import { addCardToCart } from '@/components/cart/addToCart'
 import { flyToCart } from '@/components/cart/flyToCart'
-import { CustomOrderForm } from '@/components/forms/CustomOrderForm'
-import { QuestionForm } from '@/components/forms/QuestionForm'
+import { DeferredCustomOrderForm, DeferredQuestionForm } from '@/components/forms/LazyForms'
 import { StickyBuyBar } from './StickyBuyBar'
 import { cn } from '@/lib/cn'
 
@@ -183,10 +182,10 @@ export function ProductBuy({ card, variants, basePrice, compareAt, shortDescript
       <StickyBuyBar target={addRef} card={card} variantLabel={selected?.label ?? ''} price={price} onAdd={add} />
 
       <Dialog open={modal === 'custom'} onClose={() => setModal(null)} title={t('otherSize')} width={560}>
-        <CustomOrderForm product={{ id: card.id, title: card.title }} />
+        <DeferredCustomOrderForm open={modal === 'custom'} product={{ id: card.id, title: card.title }} />
       </Dialog>
       <Dialog open={modal === 'question'} onClose={() => setModal(null)} title={t('askQuestion')} variant="modal">
-        <QuestionForm product={{ id: card.id, title: card.title }} variantSku={selected?.sku} variantLabel={selected?.label} />
+        <DeferredQuestionForm open={modal === 'question'} product={{ id: card.id, title: card.title }} variantSku={selected?.sku} variantLabel={selected?.label} />
       </Dialog>
     </div>
   )

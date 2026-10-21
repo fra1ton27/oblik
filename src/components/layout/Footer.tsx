@@ -7,7 +7,7 @@ import { DeveloperCredit } from './DeveloperCredit'
 import { FooterMarquee } from './FooterMarquee'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { CookieSettingsButton } from './CookieConsent'
-import { NewsletterForm } from '@/components/forms/NewsletterForm'
+import { LazyNewsletterForm } from '@/components/forms/LazyForms'
 import { Logo } from './Logo'
 import { cn } from '@/lib/cn'
 
@@ -34,7 +34,7 @@ export async function Footer({ brand, columns, socials, variant = 'full' }: Prop
         'container-site flex flex-col gap-3 py-6 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-x-8',
         variant === 'full' && 'border-t border-milk/15',
       )}
-      style={{ paddingBottom: 'calc(24px + env(safe-area-inset-bottom) + var(--bottom-reserve, 0px))' }}
+      style={{ paddingBottom: 'calc(24px + env(safe-area-inset-bottom) + var(--bottom-reserve, 0px) + var(--sticky-bar-h, 0px))' }}
     >
       <p className="text-[13px] text-milk/85">{t('copyright', { year, brand })}</p>
       <nav aria-label={t('legalLabel')} className="flex flex-wrap items-center gap-x-1 gap-y-2 text-[13px]">
@@ -90,7 +90,7 @@ export async function Footer({ brand, columns, socials, variant = 'full' }: Prop
           <div>
             <h2 className="t-caption mb-4 text-lavender">{t('colSubscribe')}</h2>
             <p className="t-small mb-4 text-milk/85">{t('subscribeText')}</p>
-            <NewsletterForm />
+            <LazyNewsletterForm />
           </div>
         </div>
         {/* Мобайл: колонки аккордеоном, подписка на всю ширину */}
@@ -115,7 +115,7 @@ export async function Footer({ brand, columns, socials, variant = 'full' }: Prop
           <div className="pt-8">
             <h2 className="t-caption mb-3 text-lavender">{t('colSubscribe')}</h2>
             <p className="t-small mb-4 text-milk/85">{t('subscribeText')}</p>
-            <NewsletterForm />
+            <LazyNewsletterForm />
           </div>
         </div>
       </div>

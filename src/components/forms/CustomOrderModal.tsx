@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button, type ButtonVariant } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
-import { CustomOrderForm } from './CustomOrderForm'
+import { DeferredCustomOrderForm } from './LazyForms'
 
 /** Кнопка, открывающая форму индивидуального заказа в модалке (с подставленной моделью) */
 export function CustomOrderModalButton({
@@ -34,7 +34,7 @@ export function CustomOrderModalButton({
         </Button>
       )}
       <Dialog open={open} onClose={() => setOpen(false)} title={t('customTitle')} width={560}>
-        <CustomOrderForm product={product ?? null} />
+        <DeferredCustomOrderForm open={open} product={product ?? null} />
       </Dialog>
     </>
   )

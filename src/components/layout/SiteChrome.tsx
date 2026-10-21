@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import { getLayoutData } from '@/lib/data/layout'
@@ -28,12 +29,15 @@ export async function SiteChrome({ children, variant = 'default' }: Props) {
       <main id="main" tabIndex={-1} className="outline-none">
         {children}
       </main>
-      <Footer
-        brand={data.brand}
-        columns={data.footerColumns}
-        socials={data.socials}
-        variant={variant === 'checkout' ? 'simple' : 'full'}
-      />
+      {/* отдельная граница гидратации: подвал не удлиняет первую задачу гидратации страницы */}
+      <Suspense fallback={null}>
+        <Footer
+          brand={data.brand}
+          columns={data.footerColumns}
+          socials={data.socials}
+          variant={variant === 'checkout' ? 'simple' : 'full'}
+        />
+      </Suspense>
     </>
   )
 }

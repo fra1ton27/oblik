@@ -22,11 +22,17 @@ import { useQuote } from './useQuote'
 import { EmptyShelf } from './EmptyShelf'
 import { cn } from '@/lib/cn'
 
-type Props = { popular: Card[]; suggestions: Card[]; displayCurrency: { code: string; rate: number } | null }
+type Props = {
+  popular: Card[]
+  suggestions: Card[]
+  displayCurrency: { code: string; rate: number } | null
+  /** по куке-подсказке корзина, скорее всего, пуста: пустое состояние рисуем уже на сервере (LCP, без сдвига) */
+  assumeEmpty?: boolean
+}
 
 const PROMO_KEY = 'oblik-promo'
 
-export function CartView({ popular, suggestions, displayCurrency }: Props) {
+export function CartView({ popular, suggestions, displayCurrency, assumeEmpty = false }: Props) {
   const t = useTranslations('cart')
   const tc = useTranslations('common')
   const f = useFormat()
@@ -57,7 +63,7 @@ export function CartView({ popular, suggestions, displayCurrency }: Props) {
     }
   }, [lines.length])
 
-  if (!isClient) {
+  if (!isClient && !assumeEmpty) {
     return (
       <div className="flex flex-col gap-4">
         <Skeleton className="h-28" />
@@ -66,7 +72,7 @@ export function CartView({ popular, suggestions, displayCurrency }: Props) {
     )
   }
 
-  if (!lines.length) {
+  if (!isClient || !lines.length) {
     return (
       <div className="flex flex-col items-center pt-6 pb-4 text-center">
         <EmptyShelf className="w-[200px] md:w-[240px]" />
