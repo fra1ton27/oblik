@@ -39,7 +39,7 @@ export type SeedOptions = {
 
 export type SeedResult = { done: boolean; seconds: number }
 
-/** Остановка по времени: у функции Netlify 60 с на запрос */
+/** Остановка по времени: у функции Netlify 30 с на запрос */
 class SeedPaused extends Error {}
 
 function checkpoint() {

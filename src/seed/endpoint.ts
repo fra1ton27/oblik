@@ -1,8 +1,11 @@
 import type { Endpoint } from 'payload'
 import { revalidate, tags } from '@/lib/revalidate'
 
-/** Сколько seed работает за один запрос: функция Netlify обрывается на 60 с */
-const BUDGET_MS = 35_000
+/**
+ * Сколько seed работает за один запрос. Функцию Next.js на Netlify обрывают на 30 с (видно в логах функции),
+ * а одна запись (товар с картинками) занимает до нескольких секунд — оставляем запас.
+ */
+const BUDGET_MS = 15_000
 
 /**
  * POST /api/demo-seed — демо-данные из админки там, где нет командной строки (Netlify, README).
