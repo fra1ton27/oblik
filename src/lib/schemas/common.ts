@@ -20,6 +20,9 @@ export type ValidationKey =
   | 'date'
   | 'files'
   | 'choose'
+  | 'emailTaken'
+  | 'sameEmail'
+  | 'wrongPassword'
 
 const msg = (key: ValidationKey) => ({ message: key })
 

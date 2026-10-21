@@ -30,8 +30,9 @@ export async function saveCart(lines: StoredLine[]): Promise<{ ok: boolean }> {
 }
 
 /**
- * При входе гостевая и серверная корзины сливаются: количества одинаковых позиций складываются.
- * Возвращает итоговый список, который клиент кладёт в localStorage.
+ * При входе гостевая и серверная корзины сливаются: у одинаковых позиций берём большее количество.
+ * Слияние идемпотентно: после выхода в браузере остаётся копия корзины аккаунта, и повторный вход
+ * не должен её удваивать. Возвращает итоговый список, который клиент кладёт в localStorage.
  */
 export async function mergeCart(guest: StoredLine[]): Promise<StoredLine[]> {
   const customer = await getSessionCustomer()
@@ -43,7 +44,7 @@ export async function mergeCart(guest: StoredLine[]): Promise<StoredLine[]> {
   for (const l of server) map.set(l.key, { ...l })
   for (const l of guest) {
     const ex = map.get(l.key)
-    map.set(l.key, ex ? { ...ex, qty: Math.min(99, ex.qty + l.qty), snapshot: l.snapshot } : { ...l })
+    map.set(l.key, ex ? { ...ex, qty: Math.min(99, Math.max(ex.qty, l.qty)), snapshot: l.snapshot } : { ...l })
   }
   const merged = [...map.values()]
   await saveCart(merged)

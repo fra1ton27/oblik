@@ -25,3 +25,14 @@ export function renderAuthEmail(kind: Kind, locale: Locale, { token, name }: { t
   })
   return { subject: copy.subject, html, link }
 }
+
+/** Менеджеру — по-русски: покупатель просит удалить аккаунт и данные */
+export function renderDeletionManager(customer: { id: number | string; email: string; name?: string | null }) {
+  const subject = `Запрос на удаление данных: ${customer.email}`
+  const body = [
+    paragraph(`${customer.name ?? '—'}, ${customer.email} просит удалить аккаунт и персональные данные.`),
+    paragraph('Проверьте незакрытые заказы и ответьте покупателю в течение 30 дней.'),
+    `<p style="margin:24px 0 0">${button(`${site.url}/admin/collections/customers/${customer.id}`, 'Открыть в админке')}</p>`,
+  ].join('')
+  return { subject, html: emailLayout({ locale: 'ru', title: subject, body }) }
+}

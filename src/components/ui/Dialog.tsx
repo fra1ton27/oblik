@@ -40,10 +40,10 @@ export function Dialog({
   children,
   footer,
   variant = 'drawer',
-  sheetOnMobile = true,
+  sheetOnMobile,
   className,
   bodyClassName,
-  width = 440,
+  width,
   tone = 'paper',
   initialFocus,
 }: Props) {
@@ -54,9 +54,11 @@ export function Dialog({
   const opener = useRef<HTMLElement | null>(null)
   const closing = useRef(false)
 
+  // дроуэр на мобайле по умолчанию становится нижним листом, модалка — только по запросу (sheetOnMobile)
+  const mobileSheet = sheetOnMobile ?? variant === 'drawer'
   const isSheet = useCallback(
-    () => variant === 'sheet' || (variant === 'drawer' && sheetOnMobile && window.matchMedia('(max-width: 767px)').matches),
-    [variant, sheetOnMobile],
+    () => variant === 'sheet' || ((variant === 'drawer' || variant === 'modal') && mobileSheet && window.matchMedia('(max-width: 767px)').matches),
+    [variant, mobileSheet],
   )
 
   const animateClose = useCallback(() => {
@@ -72,14 +74,7 @@ export function Dialog({
     }
     if (prefersReducedMotion()) return finish()
     closing.current = true
-    const to =
-      variant === 'modal'
-        ? { y: 24, opacity: 0 }
-        : variant === 'fullscreen'
-          ? { opacity: 0 }
-          : isSheet()
-            ? { yPercent: 100 }
-            : { xPercent: 100 }
+    const to = isSheet() ? { yPercent: 100 } : variant === 'modal' ? { y: 24, opacity: 0 } : variant === 'fullscreen' ? { opacity: 0 } : { xPercent: 100 }
     gsap.to(panel, { ...to, duration: 0.3, ease: 'power3.in', onComplete: finish })
   }, [isSheet, variant])
 
@@ -94,15 +89,15 @@ export function Dialog({
       document.documentElement.classList.add('scroll-locked')
       if (!prefersReducedMotion()) {
         // opacity, а не autoAlpha: элементы с visibility:hidden нельзя сфокусировать
-        const from =
-          variant === 'modal'
-            ? { y: 24, opacity: 0 }
+        // анимируем только свою ось: общий сброс xPercent/yPercent ломал бы позиционирование панели
+        const [from, to] = isSheet()
+          ? [{ yPercent: 100 }, { yPercent: 0 }]
+          : variant === 'modal'
+            ? [{ y: 24, opacity: 0 }, { y: 0, opacity: 1 }]
             : variant === 'fullscreen'
-              ? { opacity: 0 }
-              : isSheet()
-                ? { yPercent: 100 }
-                : { xPercent: 100 }
-        gsap.fromTo(panel, from, { x: 0, y: 0, xPercent: 0, yPercent: 0, opacity: 1, duration: 0.4, ease: 'soft' })
+              ? [{ opacity: 0 }, { opacity: 1 }]
+              : [{ xPercent: 100 }, { xPercent: 0 }]
+        gsap.fromTo(panel, from, { ...to, duration: 0.4, ease: 'soft' })
         gsap.fromTo(dialog, { '--backdrop': 0 }, { '--backdrop': 1, duration: 0.4 })
       }
       const target =
@@ -162,12 +157,16 @@ export function Dialog({
   const layout = {
     drawer: cn(
       'fixed m-0 flex flex-col',
-      sheetOnMobile
+      mobileSheet
         ? 'inset-x-0 bottom-0 top-auto h-[90svh] max-h-[90svh] w-full max-w-none rounded-t-[24px] md:inset-y-0 md:right-0 md:left-auto md:h-dvh md:max-h-none md:w-[var(--drawer-w)] md:rounded-none md:rounded-l-[24px]'
         : 'inset-y-0 right-0 left-auto h-dvh max-h-none w-[min(var(--drawer-w),100vw)] max-w-none rounded-l-[24px]',
     ),
     sheet: 'fixed inset-x-0 bottom-0 top-auto m-0 flex max-h-[90svh] w-full max-w-none flex-col rounded-t-[24px]',
-    modal: 'fixed inset-x-4 top-1/2 m-0 mx-auto flex max-h-[min(90svh,860px)] w-auto max-w-[640px] -translate-y-1/2 flex-col rounded-[24px] md:inset-x-0',
+    // центр без transform (inset + margin auto + h-fit): transform занят анимацией GSAP
+    modal: cn(
+      'fixed inset-x-4 inset-y-0 m-auto flex h-fit max-h-[min(90svh,860px)] w-auto max-w-[var(--modal-w,640px)] flex-col rounded-[24px] md:inset-x-0',
+      mobileSheet && 'max-md:inset-x-0 max-md:top-auto max-md:bottom-0 max-md:mb-0 max-md:max-h-[90svh] max-md:w-full max-md:max-w-none max-md:rounded-b-none',
+    ),
     fullscreen: 'fixed inset-0 m-0 flex h-dvh max-h-none w-full max-w-none flex-col',
   }[variant]
 
@@ -179,16 +178,16 @@ export function Dialog({
         'overflow-visible bg-transparent p-0 text-ink backdrop:bg-ink/40 backdrop:opacity-[var(--backdrop,1)]',
         'open:block',
       )}
-      style={{ ['--drawer-w' as string]: `${width}px` }}
+      style={{ ['--drawer-w' as string]: `${width ?? 440}px`, ...(width ? { ['--modal-w' as string]: `${width}px` } : {}) }}
     >
       <div
         ref={panelRef}
         className={cn(layout, tones[tone], 'shadow-float outline-none', className)}
-        style={{ paddingBottom: variant === 'modal' ? undefined : 'env(safe-area-inset-bottom)' }}
+        style={{ paddingBottom: variant === 'modal' && !mobileSheet ? undefined : 'env(safe-area-inset-bottom)' }}
       >
-        {(variant === 'sheet' || (variant === 'drawer' && sheetOnMobile)) && (
+        {(variant === 'sheet' || ((variant === 'drawer' || variant === 'modal') && mobileSheet)) && (
           <div
-            className={cn('flex touch-none justify-center pt-2.5 pb-1', variant === 'drawer' && 'md:hidden')}
+            className={cn('flex touch-none justify-center pt-2.5 pb-1', variant !== 'sheet' && 'md:hidden')}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}

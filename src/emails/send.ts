@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 import { isLocale, type Locale } from '@/i18n/routing'
+import { renderAuthEmail, renderDeletionManager } from './auth'
 import { renderInquiryCustomer, renderInquiryManager, renderOrderManager, renderOrderPlaced, renderOrderStatus, type EmailInquiry, type EmailOrder } from './orders'
 
 async function managerEmails(payload: Payload): Promise<string[]> {
@@ -61,4 +62,17 @@ export async function sendInquiryEmails(payload: Payload, inquiry: EmailInquiry)
   }
   const results = await Promise.allSettled(jobs)
   for (const r of results) if (r.status === 'rejected') payload.logger.error({ err: r.reason, msg: `письмо по заявке ${inquiry.number} не ушло` })
+}
+
+/** Письма авторизации, которые Payload сам не отправляет: повторное подтверждение и смена email */
+export async function sendAuthEmail(payload: Payload, kind: 'verify' | 'emailChange', to: string, locale: unknown, data: { token: string; name?: string | null }) {
+  const { subject, html } = renderAuthEmail(kind, localeOf(locale), data)
+  await payload.sendEmail({ to, subject, html })
+}
+
+export async function sendDeletionRequestEmail(payload: Payload, customer: { id: number | string; email: string; name?: string | null }) {
+  const managers = await managerEmails(payload)
+  if (!managers.length) return
+  const { subject, html } = renderDeletionManager(customer)
+  await payload.sendEmail({ to: managers, subject, html })
 }

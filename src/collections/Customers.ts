@@ -44,9 +44,11 @@ export const Customers: CollectionConfig = {
   access: {
     // покупатели никогда не попадают в админку
     admin: () => false,
-    create: () => true,
+    // регистрация, профиль, адреса и избранное идут через Server Actions (Local API с белым списком полей):
+    // так REST не даёт обойти подтверждение смены email, антиспам и лимиты
+    create: isManager,
     read: selfOrManager,
-    update: selfOrManager,
+    update: isManager,
     delete: isAdmin,
     unlock: isManager,
   },
@@ -105,6 +107,7 @@ export const Customers: CollectionConfig = {
       admin: { readOnly: true },
     },
     { name: 'pendingEmailToken', type: 'text', hidden: true },
+    { name: 'pendingEmailExpiresAt', type: 'date', hidden: true },
     {
       name: 'deletionRequestedAt',
       type: 'date',

@@ -13,7 +13,8 @@ export type ImageDTO = {
 type SizeName = 'thumb' | 'card' | 'hero' | 'full'
 
 /** Относительный URL: next/image оптимизирует локальные файлы Payload (/api/media/file/**) */
-function relative(url: string | null | undefined): string | null {
+/** Путь без origin: next/image принимает только локальные адреса из localPatterns */
+export function relativeUrl(url: string | null | undefined): string | null {
   if (!url) return null
   try {
     const u = new URL(url, 'http://local')
@@ -39,7 +40,7 @@ export function toImage(media: unknown, size: SizeName = 'card', fallbackAlt = '
   if (!media || typeof media !== 'object') return null
   const m = media as Media
   const s = m.sizes?.[size]
-  const src = relative(s?.url) ?? relative(m.url)
+  const src = relativeUrl(s?.url) ?? relativeUrl(m.url)
   if (!src) return null
   return {
     src,

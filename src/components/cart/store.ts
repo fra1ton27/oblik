@@ -32,6 +32,8 @@ export function lineKey(productId: number | string, variantSku: string | null) {
 
 type CartState = {
   lines: CartLine[]
+  /** id покупателя, с чьей серверной корзиной уже слились (null — гостевая корзина) */
+  owner: string | null
   miniCartOpen: boolean
   /** Последнее добавленное — для анимации «летит в корзину» и подсветки в мини-корзине */
   lastAddedKey: string | null
@@ -40,6 +42,7 @@ type CartState = {
   remove: (key: string) => { line: CartLine; index: number } | null
   restore: (line: CartLine, index: number) => void
   replaceAll: (lines: CartLine[]) => void
+  setOwner: (owner: string | number | null) => void
   clear: () => void
   openMiniCart: () => void
   closeMiniCart: () => void
@@ -51,6 +54,7 @@ export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
       lines: [],
+      owner: null,
       miniCartOpen: false,
       lastAddedKey: null,
       add: ({ qty = 1, ...input }) => {
@@ -87,6 +91,7 @@ export const useCart = create<CartState>()(
           return { lines }
         }),
       replaceAll: (lines) => set({ lines }),
+      setOwner: (owner) => set({ owner: owner === null ? null : String(owner) }),
       clear: () => set({ lines: [], lastAddedKey: null }),
       openMiniCart: () => set({ miniCartOpen: true }),
       closeMiniCart: () => set({ miniCartOpen: false }),
@@ -96,7 +101,7 @@ export const useCart = create<CartState>()(
       name: 'oblik-cart-v1',
       version: 1,
       storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ lines: s.lines }),
+      partialize: (s) => ({ lines: s.lines, owner: s.owner }),
     },
   ),
 )

@@ -11,8 +11,9 @@ import { quoteCart, type Quote } from '@/lib/cart/quote'
 import { adjustStock } from '@/lib/stock'
 import { getPaymentProvider } from '@/lib/payments'
 import { sendOrderPlacedEmails } from '@/emails/send'
-import { fieldErrorsFrom } from './result'
 import { z } from 'zod'
+import { password as passwordRule } from '@/lib/schemas/auth'
+import { fieldErrorsFrom } from './result'
 
 export type PlaceOrderResult =
   | { ok: true; number: string; token: string }
@@ -151,30 +152,27 @@ export async function placeOrder(input: CheckoutInput, rawLines: CartLineInput[]
   return { ok: true, number: order.number ?? '', token }
 }
 
-const passwordSchema = z.string().min(8, 'passwordShort').max(128, 'tooLong')
-
 /**
  * «Создайте пароль, чтобы следить за заказом»: кабинет на email из заказа, заказ привязывается.
  * Вход станет доступен после подтверждения email (письмо уходит на языке заказа).
+ * Если кабинет на этот email уже есть, заказ не привязываем без входа: просим войти.
  */
 export async function createAccountFromOrder(number: string, token: string, password: string): Promise<{ ok: boolean; error?: string }> {
-  const parsed = passwordSchema.safeParse(password)
+  const parsed = passwordRule.safeParse(password)
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'passwordShort' }
   const payload = await getPayloadClient()
   const res = await payload.find({ collection: 'orders', where: { number: { equals: number } }, limit: 1, depth: 0, overrideAccess: true })
   const order = res.docs[0]
   if (!order || !order.accessToken || order.accessToken !== token || order.customer) return { ok: false, error: 'generic' }
   const email = order.contact.email.toLowerCase()
-  const existing = await payload.find({ collection: 'customers', where: { email: { equals: email } }, limit: 1, overrideAccess: true })
-  let customerId = existing.docs[0]?.id
-  if (!customerId) {
-    const created = await payload.create({
-      collection: 'customers',
-      data: { email, password: parsed.data, name: order.contact.name, phone: order.contact.phone, locale: (order.locale as 'ru' | 'en' | 'sr') ?? 'ru' },
-      overrideAccess: true,
-    })
-    customerId = created.id
-  }
+  const existing = await payload.find({ collection: 'customers', where: { email: { equals: email } }, limit: 1, depth: 0, overrideAccess: true })
+  if (existing.docs.length) return { ok: false, error: 'accountExists' }
+  const created = await payload.create({
+    collection: 'customers',
+    data: { email, password: parsed.data, name: order.contact.name, phone: order.contact.phone, locale: (order.locale as 'ru' | 'en' | 'sr') ?? 'ru' },
+    overrideAccess: true,
+  })
+  const customerId = created.id
   await payload.update({ collection: 'orders', id: order.id, data: { customer: customerId }, overrideAccess: true, context: { skipEmail: true } })
   return { ok: true }
 }

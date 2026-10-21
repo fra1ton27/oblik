@@ -15,6 +15,7 @@ import { cutoutImage, interiorImage, mapImage, portraitImage, productImage, swat
 import { richText, type RichBlock } from './lexical'
 import { palette as P } from '../styles/palette'
 import { site } from '../config/site'
+import { relativeUrl } from '../lib/media'
 
 type Locale = 'ru' | 'en' | 'sr'
 const LOCALES: Locale[] = ['ru', 'en', 'sr']
@@ -624,7 +625,7 @@ async function seedCustomer(productIds: Record<string, number>) {
           unitPrice: unit,
           lineTotal: unit * qty,
           reserved: 0,
-          image: typeof img === 'object' ? (img?.sizes?.thumb?.url ?? img?.url) : undefined,
+          image: typeof img === 'object' ? (relativeUrl(img?.sizes?.thumb?.url ?? img?.url) ?? undefined) : undefined,
           slug: p.slug,
         }
       }),
@@ -653,7 +654,34 @@ async function seedCustomer(productIds: Record<string, number>) {
       context: ctx,
     })
   }
-  payload.logger.info(`seed: демо-покупатель ${email} и 3 заказа`)
+  // заявки для раздела «Мои заявки»: индивидуальный заказ в работе и закрытый вопрос по товару
+  const inquiries = [
+    {
+      source: 'seed:demo-custom',
+      type: 'custom' as const,
+      status: 'in_progress' as const,
+      data: { furnitureType: 'storage', furnitureTypeLabel: 'Стеллаж в нишу 180 × 40 × 240 см', description: 'Стеллаж в нишу у окна, дуб, закрытые ящики внизу.' },
+      product: undefined,
+    },
+    {
+      source: 'seed:demo-question',
+      type: 'question' as const,
+      status: 'closed' as const,
+      data: { question: 'Можно ли заказать «Облако» в ткани заказчика?' },
+      product: productIds['sofa-oblako'],
+    },
+  ]
+  for (const q of inquiries) {
+    const exists = await payload.find({ collection: 'inquiries', where: { and: [{ sourcePage: { equals: q.source } }, { customer: { equals: id } }] }, limit: 1, overrideAccess: true })
+    if (exists.docs.length) continue
+    await payload.create({
+      collection: 'inquiries',
+      data: { type: q.type, status: q.status, name: data.name, email, phone: data.phone, locale: 'ru', sourcePage: q.source, data: q.data, product: q.product, customer: id },
+      overrideAccess: true,
+      context: ctx,
+    })
+  }
+  payload.logger.info(`seed: демо-покупатель ${email}, 3 заказа и 2 заявки`)
 }
 
 async function seed() {

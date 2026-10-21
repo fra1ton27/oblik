@@ -972,6 +972,7 @@ export interface Customer {
   favorites?: (number | Product)[] | null;
   pendingEmail?: string | null;
   pendingEmailToken?: string | null;
+  pendingEmailExpiresAt?: string | null;
   deletionRequestedAt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1040,6 +1041,7 @@ export interface Inquiry {
  */
 export interface File {
   id: number;
+  owner?: (number | null) | Customer;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1916,6 +1918,7 @@ export interface CustomersSelect<T extends boolean = true> {
   favorites?: T;
   pendingEmail?: T;
   pendingEmailToken?: T;
+  pendingEmailExpiresAt?: T;
   deletionRequestedAt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2073,6 +2076,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "files_select".
  */
 export interface FilesSelect<T extends boolean = true> {
+  owner?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

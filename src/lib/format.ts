@@ -56,7 +56,7 @@ export function formatDate(
         : { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }
   let out = new Intl.DateTimeFormat(intlLocale[locale], { ...options, timeZone: 'Europe/Belgrade' }).format(date)
   // ru-RU добавляет «г.» после года: в ТЗ формат «20 октября 2026»
-  if (locale === 'ru') out = out.replace(/\s?г\.(?=,|$)/, '')
+  if (locale === 'ru') out = out.replace(/\s?г\.(?=,|\s|$)/, '')
   return out
 }
 

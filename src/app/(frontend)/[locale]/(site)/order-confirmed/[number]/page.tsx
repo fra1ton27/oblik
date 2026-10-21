@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import { getPayloadClient } from '@/lib/payload'
+import { relativeUrl } from '@/lib/media'
 import { getSessionCustomer } from '@/lib/auth'
 import { pageMetadata } from '@/lib/seo'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -64,7 +65,7 @@ export default async function OrderConfirmedPage({ params, searchParams }: Props
           token: token ?? '',
           email: order.contact.email,
           canCreateAccount: !customer && !ownerId && Boolean(token),
-          items: (order.items ?? []).map((i) => ({ title: i.title, variantLabel: i.variantLabel, qty: i.qty, lineTotal: i.lineTotal, image: i.image })),
+          items: (order.items ?? []).map((i) => ({ title: i.title, variantLabel: i.variantLabel, qty: i.qty, lineTotal: i.lineTotal, image: relativeUrl(i.image) })),
           total: order.totals?.total ?? 0,
           delivery,
         }}

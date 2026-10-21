@@ -90,11 +90,12 @@ export async function submitCustom(formData: FormData): Promise<ActionResult<{ n
   if (!spam.ok) return { ok: false, error: spam.reason === 'rateLimited' ? 'rateLimited' : 'spam' }
 
   const payload = await getPayloadClient()
+  const customer = await getSessionCustomer()
   const fileIds: number[] = []
   for (const f of buffers) {
     const doc = await payload.create({
       collection: 'files',
-      data: {},
+      data: { owner: customer ? Number(customer.id) : null },
       file: { data: f.data, mimetype: f.mime, name: f.name, size: f.data.length },
       overrideAccess: true,
     })
@@ -102,7 +103,6 @@ export async function submitCustom(formData: FormData): Promise<ActionResult<{ n
   }
 
   const t = await getTranslations({ locale: loc(meta.locale), namespace: 'forms' })
-  const customer = await getSessionCustomer()
   const { website: _w, startedAt: _s, consent: _c, ...data } = parsed.data
   const res = await saveInquiry({
     type: 'custom',
