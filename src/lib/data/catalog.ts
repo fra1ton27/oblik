@@ -188,3 +188,17 @@ export const getAllProductSlugs = () =>
     ['product-slugs'],
     { tags: catalogTags },
   )()
+
+export type DesignerDTO = { id: number; name: string; role: string; bio: string; photo: ImageDTO | null }
+
+/** Дизайнеры для страницы «О нас» (раздел 6.2 ТЗ: команда) */
+export const getDesigners = (locale: Locale) =>
+  unstable_cache(
+    async (): Promise<DesignerDTO[]> => {
+      const payload = await getPayloadClient()
+      const res = await payload.find({ collection: 'designers', locale, depth: 1, limit: 50, sort: 'createdAt', overrideAccess: false })
+      return res.docs.map((d) => ({ id: d.id, name: d.name, role: d.role ?? '', bio: d.bio ?? '', photo: toImage(d.photo, 'card', d.name) }))
+    },
+    ['designers', locale],
+    { tags: [tags.designers] },
+  )()

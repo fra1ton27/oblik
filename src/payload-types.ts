@@ -1103,6 +1103,7 @@ export interface Page {
   title: string;
   key: 'privacy' | 'terms' | 'delivery' | 'about' | 'custom' | 'contact';
   intro?: string | null;
+  heroImage?: (number | null) | Media;
   content?: {
     root: {
       type: string;
@@ -1975,6 +1976,7 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   key?: T;
   intro?: T;
+  heroImage?: T;
   content?: T;
   layout?:
     | T

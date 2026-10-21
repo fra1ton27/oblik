@@ -9,8 +9,9 @@ export function AuthShell({ title, lead, notice, children }: { title: React.Reac
   return (
     <div className="container-site pt-6 pb-10 md:pt-10">
       <section className="relative isolate overflow-hidden rounded-section bg-lavender px-2 py-8 sm:px-6 md:px-10 md:py-16">
-        <Terrace color="lavender" tone steps={6} unit={9} flip className="absolute bottom-0 left-0 -z-10 h-[62%] w-auto max-w-[80%]" />
-        <Terrace color="lavender" tone steps={4} unit={6} className="absolute top-0 right-0 -z-10 hidden h-[30%] w-auto rotate-180 md:block" />
+        {/* на мобайле шейп только сверху: снизу форма на всю ширину */}
+        <Terrace color="lavender" tone steps={6} unit={9} flip className="absolute bottom-0 left-0 -z-10 hidden h-[62%] w-auto max-w-[80%] md:block" />
+        <Terrace color="lavender" tone steps={4} unit={6} className="absolute top-0 right-0 -z-10 h-[120px] w-auto rotate-180 md:h-[30%]" />
         <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
           <div className="px-3 sm:px-0 lg:col-span-5">
             <h1 className="t-h1">{title}</h1>

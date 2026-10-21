@@ -6,6 +6,8 @@
  * переносятся из сохранённого документа, иначе локализованные подполя потерялись бы.
  */
 import crypto from 'node:crypto'
+import fs from 'node:fs'
+import path from 'node:path'
 import { getPayload, type Payload } from 'payload'
 import config from '@payload-config'
 import { categories, collections, designers, materials, type T3 } from './data/taxonomy'
@@ -396,7 +398,8 @@ async function seedPages(media: { workshop: number[]; interiors: number[] }) {
     const content = (l: Locale) => (page.content ? richText(page.content[l] as RichBlock[]) : undefined)
     const found = await payload.find({ collection: 'pages', where: { key: { equals: page.key } }, limit: 1, overrideAccess: true })
     let id = found.docs[0]?.id as number | undefined
-    const build = (l: Locale) => ({ key: page.key, title: page.title[l], intro: page.intro[l], content: content(l), layout: layout(l), needsLegalReview: Boolean(page.legal) })
+    const heroImage = { about: media.workshop[0], custom: media.interiors[1], contact: media.interiors[2] }[page.key as 'about' | 'custom' | 'contact']
+    const build = (l: Locale) => ({ key: page.key, title: page.title[l], intro: page.intro[l], heroImage, content: content(l), layout: layout(l), needsLegalReview: Boolean(page.legal) })
     if (!id) id = (await payload.create({ collection: 'pages', locale: 'ru', data: build('ru') as never, overrideAccess: true, context: ctx })).id as number
     for (const l of LOCALES) {
       const saved = await payload.findByID({ collection: 'pages', id, locale: 'ru', depth: 0, overrideAccess: true })
@@ -717,7 +720,20 @@ async function seed() {
   await seedGlobals({ hero: interiors[0], interiors, map }, reviewIds, categoryIds)
   await seedPromoCodes()
   await seedCustomer(productIds)
+  dropDataCache()
   payload.logger.info(`seed: готово за ${Math.round((Date.now() - t0) / 1000)} с`)
+}
+
+/**
+ * Seed пишет в базу мимо Next, поэтому сбросить теги unstable_cache он не может, а кэш данных
+ * Next хранит на диске и переживает перезапуск. Удаляем его, чтобы страницы перечитали базу.
+ * TODO(spec): на проде после seed нужен перезапуск приложения (будет в README, этап 12).
+ */
+function dropDataCache() {
+  for (const dir of ['.next/dev/cache/fetch-cache', '.next/cache/fetch-cache']) {
+    fs.rmSync(path.resolve(process.cwd(), dir), { recursive: true, force: true })
+  }
+  payload.logger.info('seed: кэш данных Next очищен — перезапустите dev-сервер, если он запущен')
 }
 
 // `payload run` импортирует модуль и сразу завершает процесс, поэтому ждём через top-level await

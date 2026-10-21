@@ -23,7 +23,7 @@ const converters: JSXConvertersFunction = ({ defaultConverters }) => ({
     const Tag = (node.tag === 'h1' ? 'h2' : node.tag) as 'h2' | 'h3' | 'h4'
     const text = plainText({ root: { children: [node] } })
     return (
-      <Tag id={slugify(text)} className="scroll-mt-[calc(var(--header-h)+24px)]">
+      <Tag id={slugify(text)} tabIndex={-1} className="scroll-mt-[calc(var(--header-h)+24px)] outline-none">
         {nodesToJSX({ nodes: node.children })}
       </Tag>
     )

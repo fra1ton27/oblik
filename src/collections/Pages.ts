@@ -46,6 +46,7 @@ export const Pages: CollectionConfig = {
       ],
     },
     { name: 'intro', type: 'textarea', localized: true, label: { ru: 'Вступление', en: 'Intro' } },
+    { name: 'heroImage', type: 'upload', relationTo: 'media', label: { ru: 'Фото в шапке страницы', en: 'Hero image' } },
     { name: 'content', type: 'richText', localized: true, label: { ru: 'Текст', en: 'Content' } },
     layoutField(),
     {

@@ -120,7 +120,7 @@ export const SiteSettings: GlobalConfig = {
               label: { ru: 'Часы работы', en: 'Opening hours' },
               fields: [
                 { name: 'days', type: 'text', required: true, localized: true },
-                { name: 'time', type: 'text', required: true },
+                { name: 'time', type: 'text', required: true, localized: true },
               ],
             },
             {
