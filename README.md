@@ -13,7 +13,7 @@
 С Docker всё делается одной последовательностью команд:
 
 ```bash
-git clone <адрес репозитория> oblik
+git clone https://github.com/fra1ton27/oblik.git
 cd oblik
 pnpm install
 cp .env.example .env
@@ -111,7 +111,7 @@ pnpm payload migrate:create <имя>
 ### 1. Код и переменные
 
 ```bash
-git clone <адрес репозитория> oblik
+git clone https://github.com/fra1ton27/oblik.git
 cd oblik
 cp .env.example .env
 openssl rand -hex 32
